@@ -1,26 +1,27 @@
 {
   "name": "High Intensity Training by Joost",
   "short_name": "HIT Joost",
-  "start_url": "https://hittrainingjoost.netlify.app/",
-  "scope": "https://hittrainingjoost.netlify.app/",
-  "id": "https://hittrainingjoost.netlify.app/",
+  "dir": "auto",
+  "lang": "nl-NL",
+  "start_url": "/",
+  "scope": "/",
+  "id": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0a0a0a",
   "theme_color": "#b91c1c",
   "description": "Workout logger in Mentzer-stijl met progressie tracking.",
+  "categories": ["health", "fitness", "sports"],
   "icons": [
-    {
-      "src": "https://hittrainingjoost.netlify.app/unnamed-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://hittrainingjoost.netlify.app/unnamed-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+    { "src": "/unnamed-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/unnamed-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/unnamed-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/unnamed-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "/screenshots/home-1080x2400.png", "sizes": "1080x2400", "type": "image/png", "form_factor": "wide" },
+    { "src": "/screenshots/progress-1080x2400.png", "sizes": "1080x2400", "type": "image/png", "form_factor": "wide" }
+  ],
+  "launch_handler": { "client_mode": "navigate-existing" },
+  "prefer_related_applications": false
 }
