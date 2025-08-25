@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Plus, BarChart2, CheckSquare, Save, Trash2, Upload, Download, Scale, FileText } from "lucide-react";
+import { Plus, BarChart2, CheckSquare, Save, Trash2, Upload, Download, Scale, FileText, Search } from "lucide-react";
 
 // ----------------------------------------------------
 // Config & helpers
@@ -101,6 +101,51 @@ const dayOptions = [
 ];
 
 // ----------------------------------------------------
+// Extra compound free-weight oefeningen (toegevoegd)
+// ----------------------------------------------------
+const ADDITIONAL_COMPOUND_EXERCISES = [
+  // Lower body
+  "Front Squat",
+  "Low-Bar Back Squat",
+  "High-Bar Back Squat",
+  "Paused Squat",
+  "Deficit Deadlift",
+  "Conventional Deadlift",
+  "Sumo Deadlift",
+  "Snatch-Grip Deadlift",
+  "Trap Bar Deadlift",
+  "Barbell Hip Thrust",
+  "Barbell Good Morning",
+  "Barbell Walking Lunge",
+  "Bulgarian Split Squat (DB/BB)",
+  "Barbell Step-Up",
+  "Overhead Squat",
+  // Push (chest/shoulders/triceps)
+  "Incline Barbell Bench Press",
+  "Decline Barbell Bench Press",
+  "Close-Grip Bench Press",
+  "Paused Bench Press",
+  "Standing Military Press",
+  "Push Press",
+  "Dumbbell Bench Press (Flat)",
+  "Dumbbell Bench Press (Incline)",
+  "Dumbbell Shoulder Press",
+  "Arnold Press",
+  // Pull (back/biceps)
+  "Barbell Row (Pendlay)",
+  "Barbell Row (Yates/Underhand)",
+  "One-Arm Dumbbell Row",
+  "Chest-Supported Dumbbell Row",
+  "T-Bar Row (free plate landmine)",
+  "Pull-Up",
+  "Chin-Up",
+  // Olympic style
+  "Power Clean",
+  "Power Snatch",
+  "Push Jerk"
+];
+
+// ----------------------------------------------------
 // UI – Topbar (met dropdown menu)
 // ----------------------------------------------------
 function TopBar({ current, onNavigate, unit, onToggleUnit }) {
@@ -108,7 +153,7 @@ function TopBar({ current, onNavigate, unit, onToggleUnit }) {
     <div className="sticky top-0 z-10 bg-neutral-950 border-b border-red-900 text-white">
       <div className="mx-auto max-w-3xl px-4 py-3">
         <div className="flex items-center gap-3">
-          {/* Logo + titel (wrapt netjes, geen overlap) */}
+          {/* Logo + titel */}
           <div className="flex items-center gap-3 min-w-0">
             <img
               src="/unnamed-192.png"
@@ -151,7 +196,7 @@ function TopBar({ current, onNavigate, unit, onToggleUnit }) {
 }
 
 // ----------------------------------------------------
-// Startpagina (dag-quote + grote Start Workout button)
+// Startpagina (dag-quote + Start Workout + Start Exercise)
 // ----------------------------------------------------
 function getDailyQuote() {
   const quotes = [
@@ -163,10 +208,10 @@ function getDailyQuote() {
   return quotes[dayIndex];
 }
 
-function StartScreen({ onStart }) {
+function StartScreen({ onStartWorkout, onStartExercise }) {
   const q = getDailyQuote();
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-white text-center px-6">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-white text-center px-6 gap-6">
       <div className="max-w-2xl">
         <p className="text-neutral-300 uppercase tracking-wide mb-3">Daily Motivation</p>
         <blockquote className="text-2xl sm:text-3xl font-semibold leading-tight">
@@ -175,19 +220,108 @@ function StartScreen({ onStart }) {
         <p className="mt-3 text-neutral-400">— {q.who}</p>
       </div>
 
-      <button
-        onClick={onStart}
-        className="mt-10 px-8 py-4 rounded-2xl bg-red-700 hover:bg-red-600 text-white text-xl sm:text-2xl font-bold shadow-lg active:scale-95"
-        aria-label="Start Workout"
-      >
-        Start Workout
-      </button>
+      <div className="flex flex-col sm:flex-row gap-4 mt-4">
+        <button
+          onClick={onStartWorkout}
+          className="px-8 py-4 rounded-2xl bg-red-700 hover:bg-red-600 text-white text-xl sm:text-2xl font-bold shadow-lg active:scale-95"
+          aria-label="Start Workout"
+        >
+          Start Workout
+        </button>
+        <button
+          onClick={onStartExercise}
+          className="px-8 py-4 rounded-2xl bg-neutral-900 border border-neutral-700 hover:border-red-700 text-white text-xl sm:text-2xl font-bold shadow-lg active:scale-95"
+          aria-label="Start Exercise"
+        >
+          Start Exercise
+        </button>
+      </div>
     </div>
   );
 }
 
 // ----------------------------------------------------
-// Overige UI componenten
+// ExercisePicker (zoekbalk + typeahead)
+// ----------------------------------------------------
+function normalize(s) {
+  return s.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function ExercisePicker({ onClose, onSelect }) {
+  const builtIn = useMemo(() => {
+    const set = new Set();
+    Object.values(EXERCISE_PLAN).forEach((d) => d.exercises.forEach((e) => set.add(e.name)));
+    ADDITIONAL_COMPOUND_EXERCISES.forEach((n) => set.add(n));
+    return Array.from(set).sort();
+  }, []);
+
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = normalize(query);
+    if (!q) return builtIn.slice(0, 60); // top 60 tonen als suggestie
+    return builtIn.filter((n) => normalize(n).includes(q)).slice(0, 60);
+  }, [builtIn, query]);
+
+  // simpele typeahead: toon top 6 suggesties die met de letters beginnen
+  const suggestions = useMemo(() => {
+    const q = normalize(query);
+    if (!q) return [];
+    return builtIn.filter((n) => normalize(n).startsWith(q)).slice(0, 6);
+  }, [builtIn, query]);
+
+  return (
+    <div className="fixed inset-0 bg-black/60 text-white flex items-end sm:items-center justify-center p-4">
+      <div className="w-full max-w-2xl bg-neutral-950 border border-neutral-800 rounded-2xl shadow-xl p-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center gap-2 mb-3">
+          <Search className="w-5 h-5 text-red-500" />
+          <h2 className="text-lg font-semibold">Kies een oefening</h2>
+          <div className="ml-auto">
+            <button onClick={onClose} className="px-3 py-1.5 rounded-xl border border-neutral-800 hover:bg-neutral-900">Sluiten</button>
+          </div>
+        </div>
+
+        <input
+          autoFocus
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Zoek (typ en krijg suggesties)…"
+          className="w-full border border-neutral-700 bg-neutral-900 text-white rounded-xl px-3 py-2 mb-2"
+        />
+
+        {suggestions.length > 0 && (
+          <div className="mb-3 text-sm text-neutral-300">
+            Suggesties:{" "}
+            {suggestions.map((s, i) => (
+              <button
+                key={s}
+                onClick={() => onSelect(s)}
+                className="underline hover:text-white mr-2"
+              >
+                {s}{i < suggestions.length - 1 ? "," : ""}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {filtered.map((name) => (
+            <button
+              key={name}
+              onClick={() => onSelect(name)}
+              className="text-left p-3 rounded-xl border border-neutral-800 hover:border-red-700 hover:bg-neutral-900"
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// Overige UI componenten (ongewijzigd behalve kleine fixes)
 // ----------------------------------------------------
 function FloatingNewButton({ onClick }) {
   return (
@@ -231,8 +365,11 @@ function DayPicker({ onPick, onClose }) {
   );
 }
 
-function WorkoutForm({ dayKey, onSave, onCancel, unit }) {
-  const plan = EXERCISE_PLAN[dayKey];
+function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
+  const plan = dayKey === "custom"
+    ? { name: `Losse oefening – ${customExerciseName}`, exercises: [{ name: customExerciseName, note: "Log je werkset(ten)" }] }
+    : EXERCISE_PLAN[dayKey];
+
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [rows, setRows] = useState(() =>
     plan.exercises.map((ex) => ({ name: ex.name, note: ex.note, weight: "", reps: "", done: false, noteText: "" }))
@@ -403,9 +540,14 @@ function ProgressView({ data, unit }) {
 
   const allExercises = useMemo(() => {
     const names = new Set();
+    // uit plan
     Object.values(EXERCISE_PLAN).forEach((d) => d.exercises.forEach((e) => names.add(e.name)));
+    // extra compounds
+    ADDITIONAL_COMPOUND_EXERCISES.forEach((n) => names.add(n));
+    // alles wat ooit gelogd is
+    data.workouts.forEach((w) => w.sets.forEach((s) => names.add(s.name)));
     return Array.from(names).sort();
-  }, []);
+  }, [data]);
 
   const chartData = useMemo(() => {
     if (!exercise) return [];
@@ -557,6 +699,8 @@ export default function App() {
   const [screen, setScreen] = useState("start"); // startpagina
   const [data, setData] = useState(() => loadData());
   const [showDayPicker, setShowDayPicker] = useState(false);
+  const [showExercisePicker, setShowExercisePicker] = useState(false);
+  const [customExerciseName, setCustomExerciseName] = useState(null);
   const [dayForForm, setDayForForm] = useState(null);
 
   useEffect(() => { saveData(data); }, [data]);
@@ -564,8 +708,16 @@ export default function App() {
 
   const unit = data.settings?.unit || "kg";
   const openDayPicker = () => setShowDayPicker(true);
+  const openExercisePicker = () => setShowExercisePicker(true);
+
   const pickDay = (key) => { setDayForForm(key); setShowDayPicker(false); };
-  const handleSaveWorkout = (payload) => { setData((prev) => ({ ...prev, workouts: [...prev.workouts, payload] })); setDayForForm(null); };
+  const selectExercise = (name) => {
+    setCustomExerciseName(name);
+    setDayForForm("custom");
+    setShowExercisePicker(false);
+  };
+
+  const handleSaveWorkout = (payload) => { setData((prev) => ({ ...prev, workouts: [...prev.workouts, payload] })); setDayForForm(null); setCustomExerciseName(null); };
   const handleDeleteWorkout = (id) => setData((prev) => ({ ...prev, workouts: prev.workouts.filter((w) => w.id !== id) }));
   const toggleUnit = () => {
     const next = unit === "kg" ? "lbs" : "kg";
@@ -578,7 +730,12 @@ export default function App() {
       <TopBar current={screen} onNavigate={setScreen} unit={unit} onToggleUnit={toggleUnit} />
 
       <main className="mx-auto max-w-3xl px-4 py-4">
-        {screen === "start" && <StartScreen onStart={openDayPicker} />}
+        {screen === "start" && (
+          <StartScreen
+            onStartWorkout={openDayPicker}
+            onStartExercise={openExercisePicker}
+          />
+        )}
 
         {screen === "home" && (
           <>
@@ -593,7 +750,16 @@ export default function App() {
 
       {screen !== "start" && <FloatingNewButton onClick={openDayPicker} />}
       {showDayPicker && <DayPicker onPick={pickDay} onClose={() => setShowDayPicker(false)} />}
-      {dayForForm && <WorkoutForm dayKey={dayForForm} onSave={handleSaveWorkout} onCancel={() => setDayForForm(null)} unit={unit} />}
+      {showExercisePicker && <ExercisePicker onSelect={selectExercise} onClose={() => setShowExercisePicker(false)} />}
+      {dayForForm && (
+        <WorkoutForm
+          dayKey={dayForForm}
+          customExerciseName={customExerciseName}
+          onSave={handleSaveWorkout}
+          onCancel={() => { setDayForForm(null); setCustomExerciseName(null); }}
+          unit={unit}
+        />
+      )}
     </div>
   );
 }
