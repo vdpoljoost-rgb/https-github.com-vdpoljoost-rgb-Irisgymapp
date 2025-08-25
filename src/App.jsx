@@ -117,38 +117,52 @@ function fromKg(unit, kg) {
 function TopBar({ current, onNavigate, unit, onToggleUnit }) {
   return (
     <div className="sticky top-0 z-10 bg-neutral-950 border-b border-red-900 text-white">
-      <div className="mx-auto max-w-3xl px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3 font-semibold text-xl">
-          <img src="/unnamed-192.png" alt="App logo" className="w-10 h-10 rounded-full object-cover border-2 border-red-700" />
-          High Intensity Training by Joost
+      <div className="mx-auto max-w-3xl px-4 py-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-3 min-w-0">
+            <img src="/unnamed-192.png" alt="App logo"
+                 className="w-10 h-10 rounded-full object-cover border-2 border-red-700" />
+            <div className="font-semibold leading-tight text-lg sm:text-xl break-words">
+              <div>High Intensity</div>
+              <div>Training by Joost</div>
+            </div>
+          </div>
+
+          <nav className="flex items-center gap-2 text-sm ml-auto flex-wrap">
+            <button
+              className={`px-3 py-1.5 rounded-full ${current === "start" ? "bg-red-700 text-white" : "hover:bg-neutral-900 border border-neutral-800"}`}
+              onClick={() => onNavigate("start")}
+            >
+              Start
+            </button>
+            <button
+              className={`px-3 py-1.5 rounded-full ${current === "home" ? "bg-red-700 text-white" : "hover:bg-neutral-900 border border-neutral-800"}`}
+              onClick={() => onNavigate("home")}
+            >
+              Workouts
+            </button>
+            <button
+              className={`px-3 py-1.5 rounded-full ${current === "progress" ? "bg-red-700 text-white" : "hover:bg-neutral-900 border border-neutral-800"}`}
+              onClick={() => onNavigate("progress")}
+            >
+              Progressie
+            </button>
+            <button
+              className={`px-3 py-1.5 rounded-full ${current === "settings" ? "bg-red-700 text-white" : "hover:bg-neutral-900 border border-neutral-800"}`}
+              onClick={() => onNavigate("settings")}
+            >
+              Instellingen
+            </button>
+
+            <button
+              onClick={onToggleUnit}
+              className="ml-2 px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-700 flex items-center gap-2"
+              title="Wissel eenheid"
+            >
+              <Scale className="w-4 h-4 text-red-500" /> {unit.toUpperCase()}
+            </button>
+          </nav>
         </div>
-        <nav className="flex items-center gap-2 text-sm">
-          <button
-            className={`px-3 py-1.5 rounded-full ${current === "home" ? "bg-red-700 text-white" : "hover:bg-neutral-900 border border-neutral-800"}`}
-            onClick={() => onNavigate("home")}
-          >
-            Workouts
-          </button>
-          <button
-            className={`px-3 py-1.5 rounded-full ${current === "progress" ? "bg-red-700 text-white" : "hover:bg-neutral-900 border border-neutral-800"}`}
-            onClick={() => onNavigate("progress")}
-          >
-            Progressie
-          </button>
-          <button
-            className={`px-3 py-1.5 rounded-full ${current === "settings" ? "bg-red-700 text-white" : "hover:bg-neutral-900 border border-neutral-800"}`}
-            onClick={() => onNavigate("settings")}
-          >
-            Instellingen
-          </button>
-          <button
-            onClick={onToggleUnit}
-            className="ml-2 px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-700 flex items-center gap-2"
-            title="Wissel eenheid"
-          >
-            <Scale className="w-4 h-4 text-red-500" /> {unit.toUpperCase()}
-          </button>
-        </nav>
       </div>
     </div>
   );
