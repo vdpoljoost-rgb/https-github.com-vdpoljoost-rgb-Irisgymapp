@@ -146,7 +146,7 @@ const ADDITIONAL_COMPOUND_EXERCISES = [
 ];
 
 // ----------------------------------------------------
-// UI – Topbar (met dropdown menu)
+// UI – Topbar (dropdown menu)
 // ----------------------------------------------------
 function TopBar({ current, onNavigate, unit, onToggleUnit }) {
   return (
@@ -196,25 +196,45 @@ function TopBar({ current, onNavigate, unit, onToggleUnit }) {
 }
 
 // ----------------------------------------------------
-// Startpagina (dag-quote + Start Workout + Start Exercise)
+// Quotes (roteren elke 10 seconden)
 // ----------------------------------------------------
-function getDailyQuote() {
-  const quotes = [
-    { who: "Arnold Schwarzenegger", text: "The last three or four reps is what makes the muscle grow." },
-    { who: "Kris Gethin", text: "Discipline means doing what needs to be done even when you don’t feel like it." },
-    { who: "Mike Mentzer", text: "Hard work isn’t enough—training must be brief, intense and infrequent." }
-  ];
-  const dayIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % quotes.length;
-  return quotes[dayIndex];
-}
+const QUOTES = [
+  // Arnold Schwarzenegger
+  { who: "Arnold Schwarzenegger", text: "The last three or four reps is what makes the muscle grow." },
+  { who: "Arnold Schwarzenegger", text: "Strength does not come from winning. Your struggles develop your strengths." },
+  { who: "Arnold Schwarzenegger", text: "You can’t climb the ladder of success with your hands in your pockets." },
+  { who: "Arnold Schwarzenegger", text: "For me life is continuously being hungry. The meaning of life is not simply to exist." },
 
+  // Kris Gethin
+  { who: "Kris Gethin", text: "Discipline means doing what needs to be done even when you don’t feel like it." },
+  { who: "Kris Gethin", text: "Consistency and intensity beat motivation every time." },
+  { who: "Kris Gethin", text: "If it doesn’t challenge you, it won’t change you." },
+
+  // Mike Mentzer
+  { who: "Mike Mentzer", text: "Hard work isn’t enough—training must be brief, intense and infrequent." },
+  { who: "Mike Mentzer", text: "You don’t grow in the gym; you grow while recovering from the gym." },
+  { who: "Mike Mentzer", text: "Progress comes from the quality of effort, not the quantity of sets." }
+];
+
+// ----------------------------------------------------
+// Startpagina (quotes + Start Workout + Start Exercise)
+// ----------------------------------------------------
 function StartScreen({ onStartWorkout, onStartExercise }) {
-  const q = getDailyQuote();
+  const [idx, setIdx] = useState(0);
+  const q = QUOTES[idx];
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setIdx((prev) => (prev + 1) % QUOTES.length);
+    }, 10000); // wissel elke 10 seconden
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-white text-center px-6 gap-6">
       <div className="max-w-2xl">
-        <p className="text-neutral-300 uppercase tracking-wide mb-3">Daily Motivation</p>
-        <blockquote className="text-2xl sm:text-3xl font-semibold leading-tight">
+        <p className="text-neutral-300 uppercase tracking-wide mb-3">Motivation</p>
+        <blockquote className="text-2xl sm:text-3xl font-semibold leading-tight transition-all">
           “{q.text}”
         </blockquote>
         <p className="mt-3 text-neutral-400">— {q.who}</p>
@@ -259,11 +279,10 @@ function ExercisePicker({ onClose, onSelect }) {
 
   const filtered = useMemo(() => {
     const q = normalize(query);
-    if (!q) return builtIn.slice(0, 60); // top 60 tonen als suggestie
+    if (!q) return builtIn.slice(0, 60);
     return builtIn.filter((n) => normalize(n).includes(q)).slice(0, 60);
   }, [builtIn, query]);
 
-  // simpele typeahead: toon top 6 suggesties die met de letters beginnen
   const suggestions = useMemo(() => {
     const q = normalize(query);
     if (!q) return [];
@@ -321,7 +340,7 @@ function ExercisePicker({ onClose, onSelect }) {
 }
 
 // ----------------------------------------------------
-// Overige UI componenten (ongewijzigd behalve kleine fixes)
+// Overige UI componenten
 // ----------------------------------------------------
 function FloatingNewButton({ onClick }) {
   return (
@@ -535,26 +554,44 @@ function HistoryList({ data, onDelete, unit }) {
   );
 }
 
+// ----------------------------------------------------
+// Progressie met zoekbalk + typeahead
+// ----------------------------------------------------
 function ProgressView({ data, unit }) {
   const [exercise, setExercise] = useState("");
+  const [query, setQuery] = useState("");
 
   const allExercises = useMemo(() => {
     const names = new Set();
-    // uit plan
     Object.values(EXERCISE_PLAN).forEach((d) => d.exercises.forEach((e) => names.add(e.name)));
-    // extra compounds
     ADDITIONAL_COMPOUND_EXERCISES.forEach((n) => names.add(n));
-    // alles wat ooit gelogd is
     data.workouts.forEach((w) => w.sets.forEach((s) => names.add(s.name)));
     return Array.from(names).sort();
   }, [data]);
+
+  const norm = (s) => s.toLowerCase().replace(/\s+/g, " ").trim();
+
+  const suggestions = useMemo(() => {
+    const q = norm(query);
+    if (!q) return [];
+    return allExercises.filter((n) => norm(n).startsWith(q)).slice(0, 6);
+  }, [allExercises, query]);
+
+  const filtered = useMemo(() => {
+    const q = norm(query);
+    if (!q) return allExercises.slice(0, 60);
+    return allExercises.filter((n) => norm(n).includes(q)).slice(0, 60);
+  }, [allExercises, query]);
 
   const chartData = useMemo(() => {
     if (!exercise) return [];
     const points = [];
     for (const w of data.workouts) {
       const match = w.sets.find((s) => s.name === exercise && s.weightKg != null);
-      if (match) points.push({ date: w.date, weight: Math.round(fromKg(unit, match.weightKg) * 100) / 100 });
+      if (match) {
+        const wt = Math.round(fromKg(unit, match.weightKg) * 100) / 100;
+        points.push({ date: w.date, weight: wt });
+      }
     }
     return points.sort((a, b) => new Date(a.date) - new Date(b.date));
   }, [data, exercise, unit]);
@@ -563,22 +600,67 @@ function ProgressView({ data, unit }) {
 
   return (
     <div className="space-y-4 text-white">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-        <div className="flex items-center gap-2 font-semibold text-lg">
-          <BarChart2 className="w-5 h-5 text-red-500" /> Progressie
+      <div className="border border-neutral-800 rounded-2xl p-3 bg-neutral-950">
+        <div className="flex items-center gap-2 mb-2">
+          <BarChart2 className="w-5 h-5 text-red-500" />
+          <div className="font-semibold text-lg">Progressie</div>
         </div>
-        <select
-          value={exercise}
-          onChange={(e) => setExercise(e.target.value)}
-          className="border border-neutral-700 bg-neutral-900 text-white rounded-xl px-3 py-2 sm:ml-auto"
-        >
-          <option value="">Kies oefening…</option>
-          {allExercises.map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
+
+        <div className="relative">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 relative">
+              <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Zoek een oefening… (typ om suggesties te zien)"
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 text-white"
+              />
+            </div>
+            <button
+              onClick={() => {
+                if (query) {
+                  const exact = allExercises.find((n) => norm(n) === norm(query));
+                  const pick = exact || suggestions[0] || filtered[0] || "";
+                  setExercise(pick || "");
+                }
+              }}
+              className="px-3 py-2 rounded-xl bg-red-700 hover:bg-red-600"
+              title="Selecteer bovenste match"
+            >
+              Kies
+            </button>
+          </div>
+
+          {suggestions.length > 0 && (
+            <div className="mt-2 text-sm text-neutral-300">
+              Suggesties:{" "}
+              {suggestions.map((s, i) => (
+                <button
+                  key={s}
+                  onClick={() => { setExercise(s); setQuery(s); }}
+                  className="underline hover:text-white mr-2"
+                >
+                  {s}{i < suggestions.length - 1 ? "," : ""}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {filtered.map((name) => (
+            <button
+              key={name}
+              onClick={() => { setExercise(name); setQuery(name); }}
+              className={`text-left p-3 rounded-xl border ${
+                exercise === name ? "border-red-700 bg-neutral-900" : "border-neutral-800 hover:border-red-700 hover:bg-neutral-900"
+              }`}
+            >
+              {name}
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
       {exercise ? (
@@ -604,12 +686,17 @@ function ProgressView({ data, unit }) {
           </div>
         </div>
       ) : (
-        <div className="text-neutral-400 text-sm">Selecteer een oefening om je gewichten over tijd te zien.</div>
+        <div className="text-neutral-400 text-sm">
+          Kies een oefening via de zoekbalk of lijst om je progressie te zien.
+        </div>
       )}
     </div>
   );
 }
 
+// ----------------------------------------------------
+// Settings
+// ----------------------------------------------------
 function Settings({ data, setData }) {
   const setUnit = (unit) => {
     const next = { ...data, settings: { ...(data.settings || {}), unit } };
