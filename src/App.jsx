@@ -3,20 +3,44 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { Plus, BarChart2, CheckSquare, Save, Trash2, Upload, Download, Scale, FileText } from "lucide-react";
 
 // ----------------------------------------------------
-// Config
+// Config & helpers
 // ----------------------------------------------------
 const STORAGE_KEY = "high_intensity_training_by_joost_v1";
 const KG_PER_LB = 0.45359237;
-const LB_PER_KG = 1 / KG_PER_LB; // 2.20462
+const LB_PER_KG = 1 / KG_PER_LB;
 
-// Service worker registration helper (PWA)
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker
-      .register("/sw.js")
-      .then(() => console.log("Service Worker geregistreerd"))
-      .catch((err) => console.error("SW registratie fout:", err));
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
   }
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : { workouts: [], settings: { unit: "kg" } };
+  } catch {
+    return { workouts: [], settings: { unit: "kg" } };
+  }
+}
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+function formatDateEU(d) {
+  const dt = new Date(d);
+  const day = String(dt.getDate()).padStart(2, "0");
+  const month = String(dt.getMonth() + 1).padStart(2, "0");
+  const year = dt.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+function toKg(unit, value) {
+  const v = Number(value);
+  if (!v && v !== 0) return 0;
+  return unit === "lbs" ? v * KG_PER_LB : v;
+}
+function fromKg(unit, kg) {
+  const v = Number(kg || 0);
+  return unit === "lbs" ? v * LB_PER_KG : v;
 }
 
 // ----------------------------------------------------
@@ -77,97 +101,94 @@ const dayOptions = [
 ];
 
 // ----------------------------------------------------
-// Storage + helpers
-// ----------------------------------------------------
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { workouts: [], settings: { unit: "kg" } };
-  } catch {
-    return { workouts: [], settings: { unit: "kg" } };
-  }
-}
-
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-function formatDateEU(d) {
-  const dt = new Date(d);
-  const day = String(dt.getDate()).padStart(2, "0");
-  const month = String(dt.getMonth() + 1).padStart(2, "0");
-  const year = dt.getFullYear();
-  return `${day}-${month}-${year}`;
-}
-
-function toKg(unit, value) {
-  const v = Number(value);
-  if (!v && v !== 0) return 0;
-  return unit === "lbs" ? v * KG_PER_LB : v;
-}
-
-function fromKg(unit, kg) {
-  const v = Number(kg || 0);
-  return unit === "lbs" ? v * LB_PER_KG : v;
-}
-
-// ----------------------------------------------------
-// UI – Topbar
+// UI – Topbar (met dropdown menu)
 // ----------------------------------------------------
 function TopBar({ current, onNavigate, unit, onToggleUnit }) {
   return (
     <div className="sticky top-0 z-10 bg-neutral-950 border-b border-red-900 text-white">
       <div className="mx-auto max-w-3xl px-4 py-3">
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          {/* Logo + titel (wrapt netjes, geen overlap) */}
           <div className="flex items-center gap-3 min-w-0">
-            <img src="/unnamed-192.png" alt="App logo"
-                 className="w-10 h-10 rounded-full object-cover border-2 border-red-700" />
+            <img
+              src="/unnamed-192.png"
+              alt="App logo"
+              className="w-10 h-10 rounded-full object-cover border-2 border-red-700"
+            />
             <div className="font-semibold leading-tight text-lg sm:text-xl break-words">
               <div>High Intensity</div>
               <div>Training by Joost</div>
             </div>
           </div>
 
-          <nav className="flex items-center gap-2 text-sm ml-auto flex-wrap">
-            <button
-              className={`px-3 py-1.5 rounded-full ${current === "start" ? "bg-red-700 text-white" : "hover:bg-neutral-900 border border-neutral-800"}`}
-              onClick={() => onNavigate("start")}
+          {/* Dropdown navigatie + unit toggle */}
+          <div className="ml-auto flex items-center gap-2">
+            <select
+              value={current}
+              onChange={(e) => onNavigate(e.target.value)}
+              className="bg-neutral-900 border border-neutral-700 text-white rounded-xl px-3 py-2"
+              aria-label="Navigatie"
             >
-              Start
-            </button>
-            <button
-              className={`px-3 py-1.5 rounded-full ${current === "home" ? "bg-red-700 text-white" : "hover:bg-neutral-900 border border-neutral-800"}`}
-              onClick={() => onNavigate("home")}
-            >
-              Workouts
-            </button>
-            <button
-              className={`px-3 py-1.5 rounded-full ${current === "progress" ? "bg-red-700 text-white" : "hover:bg-neutral-900 border border-neutral-800"}`}
-              onClick={() => onNavigate("progress")}
-            >
-              Progressie
-            </button>
-            <button
-              className={`px-3 py-1.5 rounded-full ${current === "settings" ? "bg-red-700 text-white" : "hover:bg-neutral-900 border border-neutral-800"}`}
-              onClick={() => onNavigate("settings")}
-            >
-              Instellingen
-            </button>
+              <option value="start">Start</option>
+              <option value="home">Workouts</option>
+              <option value="progress">Progressie</option>
+              <option value="settings">Instellingen</option>
+            </select>
 
             <button
               onClick={onToggleUnit}
-              className="ml-2 px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-700 flex items-center gap-2"
+              className="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center gap-2"
               title="Wissel eenheid"
             >
-              <Scale className="w-4 h-4 text-red-500" /> {unit.toUpperCase()}
+              <Scale className="w-4 h-4 text-red-500" />
+              {unit.toUpperCase()}
             </button>
-          </nav>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
+// ----------------------------------------------------
+// Startpagina (dag-quote + grote Start Workout button)
+// ----------------------------------------------------
+function getDailyQuote() {
+  const quotes = [
+    { who: "Arnold Schwarzenegger", text: "The last three or four reps is what makes the muscle grow." },
+    { who: "Kris Gethin", text: "Discipline means doing what needs to be done even when you don’t feel like it." },
+    { who: "Mike Mentzer", text: "Hard work isn’t enough—training must be brief, intense and infrequent." }
+  ];
+  const dayIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % quotes.length;
+  return quotes[dayIndex];
+}
+
+function StartScreen({ onStart }) {
+  const q = getDailyQuote();
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-white text-center px-6">
+      <div className="max-w-2xl">
+        <p className="text-neutral-300 uppercase tracking-wide mb-3">Daily Motivation</p>
+        <blockquote className="text-2xl sm:text-3xl font-semibold leading-tight">
+          “{q.text}”
+        </blockquote>
+        <p className="mt-3 text-neutral-400">— {q.who}</p>
+      </div>
+
+      <button
+        onClick={onStart}
+        className="mt-10 px-8 py-4 rounded-2xl bg-red-700 hover:bg-red-600 text-white text-xl sm:text-2xl font-bold shadow-lg active:scale-95"
+        aria-label="Start Workout"
+      >
+        Start Workout
+      </button>
+    </div>
+  );
+}
+
+// ----------------------------------------------------
+// Overige UI componenten
+// ----------------------------------------------------
 function FloatingNewButton({ onClick }) {
   return (
     <button
@@ -210,9 +231,6 @@ function DayPicker({ onPick, onClose }) {
   );
 }
 
-// ----------------------------------------------------
-// WorkoutForm – notities + EU-datum + kg/lbs
-// ----------------------------------------------------
 function WorkoutForm({ dayKey, onSave, onCancel, unit }) {
   const plan = EXERCISE_PLAN[dayKey];
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -273,7 +291,7 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit }) {
                 >
                   <CheckSquare className="w-5 h-5" />
                 </button>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="font-medium">{row.name}</div>
                   <div className="text-xs text-neutral-400">{row.note}</div>
                 </div>
@@ -323,9 +341,6 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit }) {
   );
 }
 
-// ----------------------------------------------------
-// HistoryList – overzicht
-// ----------------------------------------------------
 function HistoryList({ data, onDelete, unit }) {
   if (!data.workouts.length) {
     return (
@@ -383,9 +398,6 @@ function HistoryList({ data, onDelete, unit }) {
   );
 }
 
-// ----------------------------------------------------
-// Progress – grafiek per oefening
-// ----------------------------------------------------
 function ProgressView({ data, unit }) {
   const [exercise, setExercise] = useState("");
 
@@ -456,9 +468,6 @@ function ProgressView({ data, unit }) {
   );
 }
 
-// ----------------------------------------------------
-// Settings – KG/LBS + Backup/Import
-// ----------------------------------------------------
 function Settings({ data, setData }) {
   const setUnit = (unit) => {
     const next = { ...data, settings: { ...(data.settings || {}), unit } };
@@ -542,46 +551,26 @@ function Settings({ data, setData }) {
 }
 
 // ----------------------------------------------------
-// (Optioneel) Splash screen component
-// ----------------------------------------------------
-export function SplashScreen() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 text-white">
-      <img src="/unnamed-192.png" alt="Logo" className="w-32 h-32 rounded-full border-4 border-red-700 mb-6" />
-      <h1 className="text-2xl font-bold">High Intensity Training by Joost</h1>
-      <p className="text-neutral-400 mt-2">Laden...</p>
-    </div>
-  );
-}
-
-// ----------------------------------------------------
 // Root App
 // ----------------------------------------------------
 export default function App() {
-  const [screen, setScreen] = useState("home");
+  const [screen, setScreen] = useState("start"); // startpagina
   const [data, setData] = useState(() => loadData());
   const [showDayPicker, setShowDayPicker] = useState(false);
   const [dayForForm, setDayForForm] = useState(null);
 
-  useEffect(() => {
-    saveData(data);
-  }, [data]);
-
-  // Registreer SW 1x (PWA)
-  useEffect(() => {
-    registerServiceWorker();
-  }, []);
+  useEffect(() => { saveData(data); }, [data]);
+  useEffect(() => { registerServiceWorker(); }, []);
 
   const unit = data.settings?.unit || "kg";
-  const startNew = () => setShowDayPicker(true);
+  const openDayPicker = () => setShowDayPicker(true);
   const pickDay = (key) => { setDayForForm(key); setShowDayPicker(false); };
   const handleSaveWorkout = (payload) => { setData((prev) => ({ ...prev, workouts: [...prev.workouts, payload] })); setDayForForm(null); };
   const handleDeleteWorkout = (id) => setData((prev) => ({ ...prev, workouts: prev.workouts.filter((w) => w.id !== id) }));
   const toggleUnit = () => {
     const next = unit === "kg" ? "lbs" : "kg";
     const updated = { ...data, settings: { ...(data.settings || {}), unit: next } };
-    setData(updated);
-    saveData(updated);
+    setData(updated); saveData(updated);
   };
 
   return (
@@ -589,17 +578,20 @@ export default function App() {
       <TopBar current={screen} onNavigate={setScreen} unit={unit} onToggleUnit={toggleUnit} />
 
       <main className="mx-auto max-w-3xl px-4 py-4">
+        {screen === "start" && <StartScreen onStart={openDayPicker} />}
+
         {screen === "home" && (
           <>
-            <h1 className="text-xl font-semibold mb-3 text-white">Mijn Workouts</h1>
+            <h1 className="text-xl font-semibold mb-3">Mijn Workouts</h1>
             <HistoryList data={data} onDelete={handleDeleteWorkout} unit={unit} />
           </>
         )}
+
         {screen === "progress" && <ProgressView data={data} unit={unit} />}
         {screen === "settings" && <Settings data={data} setData={setData} />}
       </main>
 
-      <FloatingNewButton onClick={startNew} />
+      {screen !== "start" && <FloatingNewButton onClick={openDayPicker} />}
       {showDayPicker && <DayPicker onPick={pickDay} onClose={() => setShowDayPicker(false)} />}
       {dayForForm && <WorkoutForm dayKey={dayForForm} onSave={handleSaveWorkout} onCancel={() => setDayForForm(null)} unit={unit} />}
     </div>
