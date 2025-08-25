@@ -4,24 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-
     <title>High Intensity Training by Joost</title>
 
-    <!-- PWA manifest & icons -->
+    <!-- PWA -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/unnamed-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/unnamed-192.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <!-- Preload-splash styles (snelle foto-splash vóór React) -->
+    <!-- Alleen splash styles -->
     <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        background: #000;
-        height: 100%;
-      }
       #preload-splash {
         position: fixed;
         inset: 0;
@@ -40,19 +33,13 @@
         user-select: none;
         -webkit-user-drag: none;
       }
-      /* Klasse die we via JS toevoegen om weg te faden */
       .fade-out {
         opacity: 0 !important;
-      }
-
-      /* Voorkom horizontaal scrollen in de hele app */
-      #root {
-        overflow-x: hidden;
       }
     </style>
   </head>
   <body>
-    <!-- Ultra-snelle splash die meteen je foto toont -->
+    <!-- Ultra-snelle splash (verdwijnt zodra React start) -->
     <div id="preload-splash" aria-hidden="true">
       <img src="/splash.png" alt="Splash" />
     </div>
@@ -60,7 +47,7 @@
     <!-- React mount point -->
     <div id="root"></div>
 
-    <!-- Vite + React entry -->
+    <!-- Vite entry -->
     <script type="module" src="/src/main.jsx"></script>
 
     <noscript>Deze app heeft JavaScript nodig om te werken.</noscript>
