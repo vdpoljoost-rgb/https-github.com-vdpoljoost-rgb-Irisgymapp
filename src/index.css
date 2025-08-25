@@ -2,8 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Extra: achtergrond fallback */
+* { box-sizing: border-box; }
+
 html, body, #root {
   height: 100%;
   background: #0a0a0a;
+  overflow-x: hidden; /* <- geen horizontale scroll */
 }
