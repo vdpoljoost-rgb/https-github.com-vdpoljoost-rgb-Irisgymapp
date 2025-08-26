@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { BarChart2, Save, Trash2, Upload, Download, FileText, Search } from "lucide-react";
+import { Save, Trash2, Upload, Download, FileText, Search } from "lucide-react";
 
+/* =============================================================
+   STORAGE / UNITS / HELPERS
+   ============================================================= */
 const STORAGE_KEY = "hit_joost_centered_v2";
 const KG_PER_LB = 0.45359237;
 const LB_PER_KG = 1 / KG_PER_LB;
@@ -12,40 +15,43 @@ function saveData(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
 function formatDateEU(d){ const dt=new Date(d); const dd=String(dt.getDate()).padStart(2,"0"); const mm=String(dt.getMonth()+1).padStart(2,"0"); return `${dd}-${mm}-${dt.getFullYear()}`; }
 function toKg(unit,v){ const n=Number(v); if(!n && n!==0) return 0; return unit==="lbs"? n*KG_PER_LB: n; }
 function fromKg(unit,kg){ const n=Number(kg||0); return unit==="lbs"? n*LB_PER_KG: n; }
+const norm=(s)=>s.toLowerCase().replace(/\s+/g," ").trim();
 
-/* ---------- Plan ---------- */
+/* =============================================================
+   EXERCISE PLAN (blijft zoals je had — kan je zelf finetunen)
+   ============================================================= */
 const EXERCISE_PLAN={
   day1:{name:"Dag 1 – Legs + Calves + Abs",exercises:[
-    {name:"Squat",note:"1 werkset 6–10"},
-    {name:"Leg Press (machine)",note:"1 werkset 8–12 + 1–2 dropsets"},
-    {name:"Romanian Deadlift",note:"1 werkset 6–10"},
-    {name:"Leg Curl (machine)",note:"1 werkset 8–12 + dropset"},
-    {name:"Standing Calf Raise (machine)",note:"1 werkset 10–15 + 2 dropsets"},
-    {name:"Hanging Leg Raises",note:"1 set tot falen (10–20)"},
-    {name:"Ab Wheel Rollout",note:"1 set 8–12"}
+    {name:"Squat (Free Weights)",note:"1 werkset 6–10"},
+    {name:"Leg Press (Machine)",note:"1 werkset 8–12 + 1–2 dropsets"},
+    {name:"Romanian Deadlift (Free Weights)",note:"1 werkset 6–10"},
+    {name:"Lying Leg Curl (Machine)",note:"1 werkset 8–12 + dropset"},
+    {name:"Standing Calf Raise (Machine)",note:"1 werkset 10–15 + 2 dropsets"},
+    {name:"Hanging Leg Raise (Bodyweight)",note:"1 set tot falen (10–20)"},
+    {name:"Ab Wheel Rollout (Bodyweight)",note:"1 set 8–12"}
   ]},
   day2:{name:"Dag 2 – Upper Body",exercises:[
-    {name:"Bench Press",note:"1 werkset 6–10"},
-    {name:"Pull-Up / Lat Pulldown",note:"1 werkset 6–10"},
-    {name:"Incline Chest Press (machine)",note:"1 werkset 8–12 + dropset"},
-    {name:"Seated Row (machine)",note:"1 werkset 8–12 + dropset"},
-    {name:"Machine Chest Fly",note:"1 werkset 8–12 + dropset"},
-    {name:"Barbell Curl",note:"1 werkset 6–10"},
-    {name:"Rope Pushdown (cable)",note:"1 werkset 8–12 + dropset"}
+    {name:"Barbell Bench Press (Free Weights)",note:"1 werkset 6–10"},
+    {name:"Lat Pulldown (Machine)",note:"1 werkset 6–10"},
+    {name:"Incline Chest Press (Machine)",note:"1 werkset 8–12 + dropset"},
+    {name:"Seated Row (Machine)",note:"1 werkset 8–12 + dropset"},
+    {name:"Pec Deck Fly (Machine)",note:"1 werkset 8–12 + dropset"},
+    {name:"Barbell Curl (Free Weights)",note:"1 werkset 6–10"},
+    {name:"Rope Pushdown (Machine)",note:"1 werkset 8–12 + dropset"}
   ]},
   day3:{name:"Dag 3 – Shoulders + Calves + Cardio",exercises:[
-    {name:"Overhead Press",note:"1 werkset 6–10"},
-    {name:"Lateral Raise (dumbbell/machine)",note:"1 werkset 10–12 + dropset"},
-    {name:"Rear Delt Fly (machine)",note:"1 werkset 10–12 + dropset"},
-    {name:"Upright Row",note:"1 werkset 6–10"},
-    {name:"Seated Calf Raise (machine)",note:"1 werkset 12–15 + dropset"},
-    {name:"Ab Coaster",note:"3 sets tot falen"},
-    {name:"Hanging Leg Raises",note:"2 sets tot falen"},
+    {name:"Barbell Overhead Press (Free Weights)",note:"1 werkset 6–10"},
+    {name:"Lateral Raise (Machine)",note:"1 werkset 10–12 + dropset"},
+    {name:"Rear Delt Fly (Machine)",note:"1 werkset 10–12 + dropset"},
+    {name:"Upright Row (Free Weights)",note:"1 werkset 6–10"},
+    {name:"Seated Calf Raise (Machine)",note:"1 werkset 12–15 + dropset"},
+    {name:"Ab Coaster (Machine)",note:"3 sets tot falen"},
+    {name:"Hanging Leg Raise (Bodyweight)",note:"2 sets tot falen"},
     {name:"Steady State Cardio",note:"30–40 min zone 2"}
   ]},
   day4:{name:"Dag 4 – Cardio / Active Recovery",exercises:[
     {name:"Steady State Cardio",note:"45–60 min zone 2"},
-    {name:"Core stabiliteit (side planks, pallof press)",note:"optioneel"}
+    {name:"Core stabiliteit (Pallof Press) (Machine)",note:"optioneel"}
   ]}
 };
 const dayOptions=[
@@ -55,18 +61,138 @@ const dayOptions=[
   {key:"day4",label:EXERCISE_PLAN.day4.name},
 ];
 
-const ADDITIONAL_COMPOUND_EXERCISES=[
-  "Front Squat","Low-Bar Back Squat","High-Bar Back Squat","Paused Squat","Deficit Deadlift",
-  "Conventional Deadlift","Sumo Deadlift","Snatch-Grip Deadlift","Trap Bar Deadlift","Barbell Hip Thrust",
-  "Barbell Good Morning","Barbell Walking Lunge","Bulgarian Split Squat (DB/BB)","Barbell Step-Up",
-  "Overhead Squat","Incline Barbell Bench Press","Decline Barbell Bench Press","Close-Grip Bench Press",
-  "Paused Bench Press","Standing Military Press","Push Press","Dumbbell Bench Press (Flat)",
-  "Dumbbell Bench Press (Incline)","Dumbbell Shoulder Press","Arnold Press","Barbell Row (Pendlay)",
-  "Barbell Row (Yates/Underhand)","One-Arm Dumbbell Row","Chest-Supported Dumbbell Row","T-Bar Row (free plate landmine)",
-  "Pull-Up","Chin-Up","Power Clean","Power Snatch","Push Jerk"
+/* =============================================================
+   MASTER LIST ALL_EXERCISES — voorzien van (Machine)/(Free Weights)/(Bodyweight)
+   Niet letterlijk "alles" op aarde, maar zeer compleet voor een commerciële gym.
+   ============================================================= */
+const ALL_EXERCISES = [
+  // ── Lower body ───────────────────────────────────────────────
+  "Barbell Back Squat (Free Weights)",
+  "Front Squat (Free Weights)",
+  "Box Squat (Free Weights)",
+  "Overhead Squat (Free Weights)",
+  "Romanian Deadlift (Free Weights)",
+  "Conventional Deadlift (Free Weights)",
+  "Sumo Deadlift (Free Weights)",
+  "Deficit Deadlift (Free Weights)",
+  "Trap Bar Deadlift (Free Weights)",
+  "Barbell Good Morning (Free Weights)",
+  "Barbell Lunge (Free Weights)",
+  "Bulgarian Split Squat (Free Weights)",
+  "Walking Lunge (Free Weights)",
+  "Step-Up (Free Weights)",
+  "Hip Thrust (Free Weights)",
+  "Glute Bridge (Free Weights)",
+  "Leg Press (Machine)",
+  "Hack Squat (Machine)",
+  "Smith Machine Squat (Machine)",
+  "Smith Machine Lunge (Machine)",
+  "Leg Extension (Machine)",
+  "Lying Leg Curl (Machine)",
+  "Seated Leg Curl (Machine)",
+  "Standing Calf Raise (Machine)",
+  "Seated Calf Raise (Machine)",
+  "Hip Abduction (Machine)",
+  "Hip Adduction (Machine)",
+  "Glute Kickback (Machine)",
+
+  // ── Chest ───────────────────────────────────────────────────
+  "Barbell Bench Press (Free Weights)",
+  "Incline Barbell Bench Press (Free Weights)",
+  "Decline Barbell Bench Press (Free Weights)",
+  "Close-Grip Barbell Bench Press (Free Weights)",
+  "Dumbbell Bench Press (Free Weights)",
+  "Incline Dumbbell Bench Press (Free Weights)",
+  "Dumbbell Fly (Free Weights)",
+  "Dumbbell Pullover (Free Weights)",
+  "Chest Press (Machine)",
+  "Incline Chest Press (Machine)",
+  "Decline Chest Press (Machine)",
+  "Pec Deck Fly (Machine)",
+  "Cable Crossover (Machine)",
+
+  // ── Back ────────────────────────────────────────────────────
+  "Barbell Row (Free Weights)",
+  "Pendlay Row (Free Weights)",
+  "Yates Row (Free Weights)",
+  "Dumbbell Row (Free Weights)",
+  "T-Bar Row (Free Weights)",
+  "Seal Row (Free Weights)",
+  "Lat Pulldown (Machine)",
+  "Close-Grip Pulldown (Machine)",
+  "Straight Arm Pulldown (Machine)",
+  "Seated Row (Machine)",
+  "Chest-Supported Row (Machine)",
+  "Assisted Pull-Up (Machine)",
+
+  // ── Shoulders ───────────────────────────────────────────────
+  "Barbell Overhead Press (Free Weights)",
+  "Seated Barbell Press (Free Weights)",
+  "Push Press (Free Weights)",
+  "Dumbbell Shoulder Press (Free Weights)",
+  "Arnold Press (Free Weights)",
+  "Lateral Raise (Free Weights)",
+  "Front Raise (Free Weights)",
+  "Rear Delt Fly (Free Weights)",
+  "Upright Row (Free Weights)",
+  "Smith Machine Shoulder Press (Machine)",
+  "Lateral Raise (Machine)",
+  "Rear Delt Fly (Machine)",
+  "Face Pull (Machine)",
+
+  // ── Arms ────────────────────────────────────────────────────
+  "Barbell Curl (Free Weights)",
+  "EZ-Bar Curl (Free Weights)",
+  "Dumbbell Curl (Free Weights)",
+  "Incline Dumbbell Curl (Free Weights)",
+  "Hammer Curl (Free Weights)",
+  "Concentration Curl (Free Weights)",
+  "Preacher Curl (Machine)",
+  "Cable Curl (Machine)",
+  "Reverse Curl (Machine)",
+  "Skull Crusher (Free Weights)",
+  "Overhead Dumbbell Extension (Free Weights)",
+  "Close-Grip Bench Press (Free Weights)",
+  "Tricep Pushdown (Machine)",
+  "Overhead Cable Extension (Machine)",
+  "Rope Pushdown (Machine)",
+  "Cable Kickback (Machine)",
+
+  // ── Core / Lower back ───────────────────────────────────────
+  "Hanging Leg Raise (Bodyweight)",
+  "Hanging Knee Raise (Bodyweight)",
+  "Captain's Chair Leg Raise (Machine)",
+  "Ab Coaster (Machine)",
+  "Ab Crunch (Machine)",
+  "Cable Crunch (Machine)",
+  "Ab Wheel Rollout (Bodyweight)",
+  "Plank (Bodyweight)",
+  "Side Plank (Bodyweight)",
+  "Pallof Press (Machine)",
+  "Back Extension (Machine)",
+  "Back Extension (Bodyweight)",
+
+  // ── Bodyweight upper/lower ──────────────────────────────────
+  "Pull-Up (Bodyweight)",
+  "Chin-Up (Bodyweight)",
+  "Push-Up (Bodyweight)",
+  "Dips (Bodyweight)",
+  "Handstand Push-Up (Bodyweight)",
+  "Inverted Row (Bodyweight)",
+  "Pistol Squat (Bodyweight)",
+  "Bodyweight Lunge (Bodyweight)",
+  "Wall Sit (Bodyweight)",
+
+  // ── Olympic / power variants (Free Weights) ──────────────────
+  "Power Clean (Free Weights)",
+  "Clean and Press (Free Weights)",
+  "Power Snatch (Free Weights)",
+  "Push Jerk (Free Weights)"
 ];
 
-/* ---------- Topbar ---------- */
+/* =============================================================
+   TOPBAR
+   ============================================================= */
 function TopBar({ current, onNavigate }) {
   return (
     <div className="hit-topbar">
@@ -76,9 +202,7 @@ function TopBar({ current, onNavigate }) {
             <img src="/unnamed-192.png" alt="App logo" className="w-10 h-10 rounded-full object-cover" style={{border:"2px solid #b91c1c"}}/>
             <div className="app-title">High Intensity<br/>Training by Joost</div>
           </button>
-
           <div className="ml-auto flex items-center gap-2">
-            {/* Dropdown met Exercises die naar Start Exercise linkt */}
             <select
               value={current}
               onChange={(e)=>onNavigate(e.target.value)}
@@ -90,7 +214,6 @@ function TopBar({ current, onNavigate }) {
               <option value="progress">Progressie</option>
               <option value="settings">Instellingen</option>
             </select>
-            {/* LET OP: GEEN KG/LBS KNOP MEER HIER */}
           </div>
         </div>
       </div>
@@ -98,7 +221,9 @@ function TopBar({ current, onNavigate }) {
   );
 }
 
-/* ---------- Quotes ---------- */
+/* =============================================================
+   QUOTES (kleine flair)
+   ============================================================= */
 const QUOTES=[
   {who:"Arnold Schwarzenegger",text:"The last three or four reps is what makes the muscle grow."},
   {who:"Arnold Schwarzenegger",text:"Strength does not come from winning. Your struggles develop your strengths."},
@@ -106,7 +231,6 @@ const QUOTES=[
   {who:"Mike Mentzer",text:"Hard work isn’t enough—training must be brief, intense and infrequent."}
 ];
 
-/* ---------- Start ---------- */
 function StartScreen({ onStartWorkout, onStartExercise }){
   const [idx,setIdx]=useState(0);
   const q=QUOTES[idx];
@@ -115,7 +239,6 @@ function StartScreen({ onStartWorkout, onStartExercise }){
     <div className="center-col">
       <button onClick={onStartWorkout} className="btn btn-primary">Start Workout</button>
       <button onClick={onStartExercise} className="btn btn-ghost">Start Exercise</button>
-
       <div className="hit-card" style={{marginTop:12}}>
         <blockquote className="text-2xl font-semibold leading-tight">“{q.text}”</blockquote>
         <p className="mt-2 text-muted">— {q.who}</p>
@@ -124,24 +247,20 @@ function StartScreen({ onStartWorkout, onStartExercise }){
   );
 }
 
-const norm=(s)=>s.toLowerCase().replace(/\s+/g," ").trim();
-
-/* ---------- ExercisePicker ---------- */
+/* =============================================================
+   EXERCISE PICKER — gebruikt nu de MASTER LIST (ALL_EXERCISES)
+   met typeahead-suggesties.
+   ============================================================= */
 function ExercisePicker({ onClose, onSelect }){
-  const builtIn=useMemo(()=>{
-    const set=new Set();
-    Object.values(EXERCISE_PLAN).forEach(d=>d.exercises.forEach(e=>set.add(e.name)));
-    ADDITIONAL_COMPOUND_EXERCISES.forEach(n=>set.add(n));
-    return Array.from(set).sort();
-  },[]);
+  const builtIn = useMemo(()=> ALL_EXERCISES.slice().sort(), []);
   const [query,setQuery]=useState("");
   const filtered=useMemo(()=>{
-    const q=norm(query); if(!q) return builtIn.slice(0,60);
-    return builtIn.filter(n=>norm(n).includes(q)).slice(0,60);
+    const q=norm(query); if(!q) return builtIn.slice(0,80);
+    return builtIn.filter(n=>norm(n).includes(q)).slice(0,80);
   },[builtIn,query]);
   const suggestions=useMemo(()=>{
     const q=norm(query); if(!q) return [];
-    return builtIn.filter(n=>norm(n).startsWith(q)).slice(0,6);
+    return builtIn.filter(n=>norm(n).startsWith(q)).slice(0,8);
   },[builtIn,query]);
 
   return (
@@ -171,7 +290,9 @@ function ExercisePicker({ onClose, onSelect }){
   );
 }
 
-/* ---------- Workouts (centreren + donkere rode randen/zwart/wit) ---------- */
+/* =============================================================
+   WORKOUTS LIST / HISTORY
+   ============================================================= */
 function WorkoutsScreen({ onPickDay, data, onDelete, unit }){
   return (
     <div className="center-col">
@@ -183,7 +304,6 @@ function WorkoutsScreen({ onPickDay, data, onDelete, unit }){
           ))}
         </div>
       </div>
-
       <div className="hit-card">
         <h2 className="text-lg font-semibold">Mijn Workouts</h2>
         <HistoryList data={data} onDelete={onDelete} unit={unit}/>
@@ -206,7 +326,7 @@ function HistoryList({ data, onDelete, unit }){
               return (
                 <div key={i} className="list-item">
                   <div style={{fontWeight:700}}>{s.name}</div>
-                  <div className="text-muted" style={{fontSize:12}}>{s.note}</div>
+                  {s.note && <div className="text-muted" style={{fontSize:12}}>{s.note}</div>}
                   <div style={{marginTop:4}}>{display}{s.reps?` × ${s.reps}`:""}</div>
                   {s.noteText && <div style={{marginTop:4}}>{`📝 ${s.noteText}`}</div>}
                 </div>
@@ -224,7 +344,9 @@ function HistoryList({ data, onDelete, unit }){
   );
 }
 
-/* ---------- WorkoutForm (centreren + alleen hier KG/LBS) ---------- */
+/* =============================================================
+   WORKOUT FORM — unit switch ALLEEN hier zichtbaar
+   ============================================================= */
 function WorkoutForm({ dayKey, onSave, onCancel, unit, setUnit, customExerciseName }){
   const plan = dayKey==="custom"
     ? {name:`Losse oefening – ${customExerciseName}`, exercises:[{name:customExerciseName, note:"Log je werkset(ten)"}]}
@@ -264,7 +386,7 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit, setUnit, customExerciseNa
           {rows.map((row,idx)=>(
             <div key={idx} className="list-item" style={{display:"grid", gap:10}}>
               <div style={{fontWeight:700}}>{row.name}</div>
-              <div className="text-muted" style={{fontSize:12}}>{row.note}</div>
+              {row.note && <div className="text-muted" style={{fontSize:12}}>{row.note}</div>}
               <div style={{display:"flex", flexDirection:"column", gap:8, alignItems:"center"}}>
                 <div style={{display:"flex", gap:8, width:"100%", maxWidth:520, justifyContent:"center"}}>
                   <input type="number" placeholder={`gewicht (${unit})`} inputMode="decimal" value={row.weight} onChange={(e)=>updateField(idx,"weight",e.target.value)} className="input"/>
@@ -293,21 +415,21 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit, setUnit, customExerciseNa
   );
 }
 
-/* ---------- Progressie (centreren + zichtbare tekst) ---------- */
+/* =============================================================
+   PROGRESS VIEW — zoekt binnen ALLE_EXERCISES + gelogde namen
+   ============================================================= */
 function ProgressView({ data, unit }){
   const [exercise,setExercise]=useState("");
   const [query,setQuery]=useState("");
 
   const allExercises=useMemo(()=>{
-    const names=new Set();
-    Object.values(EXERCISE_PLAN).forEach(d=>d.exercises.forEach(e=>names.add(e.name)));
-    ADDITIONAL_COMPOUND_EXERCISES.forEach(n=>names.add(n));
+    const names=new Set(ALL_EXERCISES);
     data.workouts.forEach(w=>w.sets.forEach(s=>names.add(s.name)));
     return Array.from(names).sort();
   },[data]);
 
-  const suggestions=useMemo(()=>{ const q=norm(query); if(!q) return []; return allExercises.filter(n=>norm(n).startsWith(q)).slice(0,6); },[allExercises,query]);
-  const filtered=useMemo(()=>{ const q=norm(query); if(!q) return allExercises.slice(0,60); return allExercises.filter(n=>norm(n).includes(q)).slice(0,60); },[allExercises,query]);
+  const suggestions=useMemo(()=>{ const q=norm(query); if(!q) return []; return allExercises.filter(n=>norm(n).startsWith(q)).slice(0,8); },[allExercises,query]);
+  const filtered=useMemo(()=>{ const q=norm(query); if(!q) return allExercises.slice(0,80); return allExercises.filter(n=>norm(n).includes(q)).slice(0,80); },[allExercises,query]);
 
   const chartData=useMemo(()=>{
     if(!exercise) return [];
@@ -362,7 +484,7 @@ function ProgressView({ data, unit }){
         <div className="chart-card">
           <div style={{display:"flex", justifyContent:"center", gap:8, marginBottom:8}}>
             <div className="font-semibold">{exercise}</div>
-            {best!=null && <div className="text-muted">(beste: {best} {unit})</div>}
+            {best!=null && <div className="text-muted">(beste: {best.toFixed(2)} {unit})</div>}
           </div>
           <div style={{width:"100%", height:288}}>
             <ResponsiveContainer width="100%" height="100%">
@@ -383,7 +505,9 @@ function ProgressView({ data, unit }){
   );
 }
 
-/* ---------- Root ---------- */
+/* =============================================================
+   ROOT APP
+   ============================================================= */
 export default function App(){
   const [screen,setScreen]=useState("start");
   const [data,setData]=useState(()=>loadData());
@@ -401,7 +525,6 @@ export default function App(){
     setData(next); saveData(next);
   };
 
-  // Navigatie handler met Exercises→Start Exercise
   const handleNavigate=(value)=>{
     if(value==="exercises"){ setScreen("start"); setShowExercisePicker(true); return; }
     setScreen(value);
@@ -427,7 +550,6 @@ export default function App(){
         {screen==="settings" && <Settings data={data} setData={setData} />}
       </main>
 
-      {/* Dag kiezen */}
       {showDayPicker && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
           <div className="hit-card" style={{maxWidth:520}}>
@@ -444,10 +566,8 @@ export default function App(){
         </div>
       )}
 
-      {/* Oefening kiezen */}
       {showExercisePicker && <ExercisePicker onSelect={selectExercise} onClose={()=>setShowExercisePicker(false)} />}
 
-      {/* Formulier (altijd gecentreerd) */}
       {dayForForm && (
         <WorkoutForm
           dayKey={dayForForm}
@@ -462,7 +582,9 @@ export default function App(){
   );
 }
 
-/* ---------- Settings (backup/clear; unit niet hier zichtbaar in topbar) ---------- */
+/* =============================================================
+   SETTINGS (backup/import/clear) — unit switch NIET hier, maar in WorkoutForm
+   ============================================================= */
 function Settings({ data, setData }){
   const exportData=()=>{
     const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
