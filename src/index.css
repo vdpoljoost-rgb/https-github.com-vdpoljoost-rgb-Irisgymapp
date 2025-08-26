@@ -1,11 +1,46 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <title>High Intensity Training by Joost</title>
 
-* { box-sizing: border-box; }
+    <!-- THEMA -->
+    <link rel="stylesheet" href="/theme.css" />
+    <!-- Font voor app-naam -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 
-html, body, #root {
-  height: 100%;
-  background: #0a0a0a;
-  overflow-x: hidden; /* <- geen horizontale scroll */
-}
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/unnamed-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/unnamed-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Splash styles -->
+    <style>
+      #preload-splash { position: fixed; inset: 0; background: #000; display: grid; place-items: center; z-index: 9999; opacity: 1; transition: opacity 0.45s ease; overflow: hidden; }
+      #preload-splash .logo { width: 124px; height: 124px; border-radius: 50%; border: 2px solid #7f1d1d; object-fit: cover; box-shadow: 0 0 24px rgba(0,0,0,.6); opacity: 1; transition: opacity 0.4s ease; position: relative; z-index: 2; user-select: none; -webkit-user-drag: none; }
+      #preload-splash .photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.45s ease; user-select: none; -webkit-user-drag: none; }
+      #preload-splash .shade { position: absolute; inset: 0; background: rgba(0,0,0,0.35); opacity: 0; transition: opacity 0.45s ease; pointer-events: none; }
+      #preload-splash.show-photo .photo { opacity: 1; }
+      #preload-splash.show-photo .logo  { opacity: 0; }
+      #preload-splash.show-photo .shade { opacity: 1; }
+      #preload-splash.fade-out { opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="preload-splash" aria-hidden="true">
+      <img class="logo" src="/unnamed-192.png" alt="HIT logo" />
+      <img class="photo" src="/splash.png" alt="Joost splash" />
+      <div class="shade"></div>
+    </div>
+
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.jsx"></script>
+    <noscript>Deze app heeft JavaScript nodig om te werken.</noscript>
+  </body>
+</html>
