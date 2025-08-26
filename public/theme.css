@@ -1,11 +1,10 @@
 /* ===== HIT by Joost – Theme Reset ===== */
 :root{
-  --hit-bg:#0a0a0a;          /* bijna zwart */
-  --hit-trueblack:#000000;   /* echt zwart */
+  --hit-bg:#000000;          /* achtergrond echt zwart */
   --hit-surface:#111214;     /* kaart-achtergrond */
   --hit-border:#2a2a2e;      /* kaart/element border */
-  --hit-text:#ffffff;        /* primaire tekst */
-  --hit-muted:#b5b6ba;       /* secundaire tekst */
+  --hit-text:#ffffff;        /* primaire tekst (helder wit) */
+  --hit-muted:#d1d5db;       /* secundaire tekst (lichter dan eerst) */
   --hit-red:#b91c1c;         /* donkerrood accent */
   --hit-red-600:#dc2626;     /* hover rood */
   --hit-green:#22c55e;       /* done-indicator */
@@ -16,7 +15,7 @@
 html, body { height:100%; }
 body{
   margin:0;
-  background:var(--hit-trueblack);
+  background:var(--hit-bg);
   color:var(--hit-text);
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
@@ -24,14 +23,32 @@ body{
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji","Segoe UI Emoji";
 }
 
-/* Container breedte hint (je gebruikt al max-w via Tailwind) */
-#root > main { max-width: 880px; margin: 0 auto; }
+/* Center de app-content in het midden van het scherm */
+#root > main{
+  max-width: 880px;
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
 
-/* Topbar */
+/* Topbar (blijft donker en strak) */
 .hit-topbar{
   position:sticky; top:0; z-index:10;
   background:linear-gradient(180deg, #0b0b0c 0%, #0a0a0a 100%);
   border-bottom:1px solid var(--hit-red);
+}
+
+/* Titelstijl voor de app-naam (nieuw font via index.html) */
+.app-title{
+  font-family: "Bebas Neue", Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: 0.5px;
+  font-size: 28px;           /* groter en helder */
+  color: var(--hit-text);
+}
+@media (min-width: 480px){
+  .app-title{ font-size: 32px; }
 }
 
 /* Cards */
@@ -41,14 +58,19 @@ body{
   border-radius:var(--radius);
   padding:16px;
 }
-.hit-card + .hit-card{ margin-top:12px; }
 
 /* Buttons */
 .btn{
   cursor:pointer; border-radius:var(--radius);
-  padding:10px 14px; border:1px solid var(--hit-border);
+  padding:14px 18px; border:1px solid var(--hit-border);
   background:#121316; color:var(--hit-text);
   transition: transform .05s ease, border-color .15s ease, background .15s ease;
+  width: 100%;           /* breed en gecentreerd */
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+  font-weight: 700;
 }
 .btn:active{ transform:scale(0.98); }
 .btn-primary{ background:var(--hit-red); border-color:var(--hit-red); }
@@ -57,38 +79,29 @@ body{
 .btn-danger{ border-color:#5b1111; color:#ffb4b4; }
 .btn-danger:hover{ background:#1a0f10; border-color:#7a1515; }
 
-/* Inputs & Selects */
+/* Inputs & Selects (witte tekst) */
 .input, .select, .textarea{
   width:100%;
   background:#0f1012; color:var(--hit-text);
   border:1px solid var(--hit-border); border-radius:12px;
-  padding:8px 10px; outline:none;
+  padding:10px 12px; outline:none;
 }
 .input:focus, .select:focus, .textarea:focus{ border-color:var(--hit-red); }
 
-/* Badges / kleine indicator */
-.badge{
-  display:inline-block; font-size:12px; line-height:1; padding:4px 8px;
-  background:#151518; border:1px solid var(--hit-border); border-radius:999px;
-}
+/* Tekstkleurs */
+.text-muted{ color: var(--hit-muted); }
+.text-white{ color: var(--hit-text); }
 
-/* Lijst items */
+/* Lijst items/kaarten */
 .list-item{
   border:1px solid var(--hit-border);
   background:#0f1012; border-radius:12px; padding:12px;
 }
 
-/* Sectietitel */
-.section-title{ font-weight:600; font-size:18px; margin-bottom:8px; }
-
-/* Helpers */
-.text-muted{ color:var(--hit-muted); }
-.text-accent{ color:var(--hit-red); }
-
-/* Grafiek container (recharts kleurt zelf) */
+/* Grafiek kaart */
 .chart-card{
-  background:var(--hit-surface);
-  border:1px solid var(--hit-border);
-  border-radius:var(--radius);
-  padding:12px;
+  background: var(--hit-surface);
+  border: 1px solid var(--hit-border);
+  border-radius: var(--radius);
+  padding: 12px;
 }
