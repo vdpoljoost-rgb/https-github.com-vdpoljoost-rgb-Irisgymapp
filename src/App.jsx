@@ -31,7 +31,7 @@ function formatDateEU(d) {
 function toKg(unit, value) { const v = Number(value); if (!v && v !== 0) return 0; return unit === "lbs" ? v * KG_PER_LB : v; }
 function fromKg(unit, kg) { const v = Number(kg || 0); return unit === "lbs" ? v * LB_PER_KG : v; }
 
-// --- Plan ---
+/* ---------- Plan ---------- */
 const EXERCISE_PLAN = {
   day1: { name: "Dag 1 – Legs + Calves + Abs", exercises: [
     { name: "Squat", note: "1 werkset 6–10" },
@@ -73,7 +73,6 @@ const dayOptions = [
   { key: "day4", label: EXERCISE_PLAN.day4.name }
 ];
 
-// Extra compound oefeningen
 const ADDITIONAL_COMPOUND_EXERCISES = [
   "Front Squat","Low-Bar Back Squat","High-Bar Back Squat","Paused Squat","Deficit Deadlift",
   "Conventional Deadlift","Sumo Deadlift","Snatch-Grip Deadlift","Trap Bar Deadlift","Barbell Hip Thrust",
@@ -85,7 +84,7 @@ const ADDITIONAL_COMPOUND_EXERCISES = [
   "Pull-Up","Chin-Up","Power Clean","Power Snatch","Push Jerk"
 ];
 
-// --- Topbar ---
+/* ---------- Topbar ---------- */
 function TopBar({ current, onNavigate, unit, onToggleUnit }) {
   return (
     <div className="sticky top-0 z-10 bg-neutral-950 border-b border-red-900 text-white hit-topbar">
@@ -101,10 +100,8 @@ function TopBar({ current, onNavigate, unit, onToggleUnit }) {
               alt="App logo"
               className="w-10 h-10 rounded-full object-cover border-2 border-red-700 group-active:scale-95"
             />
-            <div className="font-semibold leading-tight text-left text-lg sm:text-xl break-words">
-              <div>High Intensity</div>
-              <div>Training by Joost</div>
-            </div>
+            {/* App-naam groter, ander font, wit */}
+            <div className="app-title">High Intensity{'\n'}Training by Joost</div>
           </button>
 
           <div className="ml-auto flex items-center gap-2">
@@ -134,7 +131,7 @@ function TopBar({ current, onNavigate, unit, onToggleUnit }) {
   );
 }
 
-// --- Quotes ---
+/* ---------- Quotes ---------- */
 const QUOTES = [
   { who: "Arnold Schwarzenegger", text: "The last three or four reps is what makes the muscle grow." },
   { who: "Arnold Schwarzenegger", text: "Strength does not come from winning. Your struggles develop your strengths." },
@@ -142,7 +139,7 @@ const QUOTES = [
   { who: "Mike Mentzer", text: "Hard work isn’t enough—training must be brief, intense and infrequent." }
 ];
 
-// --- Start ---
+/* ---------- Start (gecentreerd, knoppen onder elkaar, quote eronder) ---------- */
 function StartScreen({ onStartWorkout, onStartExercise }) {
   const [idx, setIdx] = useState(0);
   const q = QUOTES[idx];
@@ -150,25 +147,21 @@ function StartScreen({ onStartWorkout, onStartExercise }) {
     const id = setInterval(() => setIdx((p) => (p + 1) % QUOTES.length), 10000);
     return () => clearInterval(id);
   }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-white text-center px-6 gap-6">
-      <div className="max-w-2xl hit-card">
-        <blockquote className="text-2xl sm:text-3xl font-semibold leading-tight">“{q.text}”</blockquote>
-        <p className="mt-3 text-muted">— {q.who}</p>
+    <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center text-white text-center">
+      {/* Grote knoppen – onder elkaar en gecentreerd */}
+      <div className="w-full max-w-[520px] flex flex-col gap-3 px-4">
+        <button onClick={onStartWorkout} className="btn btn-primary text-white">Start Workout</button>
+        <button onClick={onStartExercise} className="btn btn-ghost text-white">Start Exercise</button>
       </div>
-      <div className="flex flex-col sm:flex-row gap-4 mt-2">
-        <button
-          onClick={onStartWorkout}
-          className="px-8 py-4 rounded-2xl bg-red-700 hover:bg-red-600 text-white text-xl sm:text-2xl font-bold shadow-lg active:scale-95 btn btn-primary"
-        >
-          Start Workout
-        </button>
-        <button
-          onClick={onStartExercise}
-          className="px-8 py-4 rounded-2xl bg-neutral-900 border border-neutral-700 hover:border-red-700 text-white text-xl sm:text-2xl font-bold shadow-lg active:scale-95 btn btn-ghost"
-        >
-          Start Exercise
-        </button>
+
+      {/* Quote eronder */}
+      <div className="mt-6 px-6 w-full max-w-2xl">
+        <div className="hit-card">
+          <blockquote className="text-2xl font-semibold leading-tight">“{q.text}”</blockquote>
+          <p className="mt-2 text-muted">— {q.who}</p>
+        </div>
       </div>
     </div>
   );
@@ -176,7 +169,7 @@ function StartScreen({ onStartWorkout, onStartExercise }) {
 
 const norm = (s) => s.toLowerCase().replace(/\s+/g, " ").trim();
 
-// --- ExercisePicker ---
+/* ---------- ExercisePicker ---------- */
 function ExercisePicker({ onClose, onSelect }) {
   const builtIn = useMemo(() => {
     const set = new Set();
@@ -200,12 +193,10 @@ function ExercisePicker({ onClose, onSelect }) {
     <div className="fixed inset-0 bg-black/60 text-white flex items-end sm:items-center justify-center p-4">
       <div className="w-full max-w-2xl bg-neutral-950 border border-neutral-800 rounded-2xl shadow-xl p-4 max-h-[90vh] overflow-y-auto hit-card">
         <div className="flex items-center gap-2 mb-3">
-          <Search className="w-5 h-5 text-accent" />
+          <Search className="w-5 h-5 text-[#b91c1c]" />
           <h2 className="text-lg font-semibold">Kies een oefening</h2>
           <div className="ml-auto">
-            <button onClick={onClose} className="px-3 py-1.5 rounded-xl border border-neutral-800 hover:bg-neutral-900 btn">
-              Sluiten
-            </button>
+            <button onClick={onClose} className="btn">Sluiten</button>
           </div>
         </div>
 
@@ -214,7 +205,7 @@ function ExercisePicker({ onClose, onSelect }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Zoek (typ en krijg suggesties)…"
-          className="w-full border border-neutral-700 bg-neutral-900 text-white rounded-xl px-3 py-2 mb-2 input"
+          className="input mb-2"
         />
 
         {suggestions.length > 0 && (
@@ -233,7 +224,7 @@ function ExercisePicker({ onClose, onSelect }) {
             <button
               key={name}
               onClick={() => onSelect(name)}
-              className="text-left p-3 rounded-xl border border-neutral-800 hover:border-red-700 hover:bg-neutral-900 list-item"
+              className="list-item text-left hover:border-[#b91c1c]"
             >
               {name}
             </button>
@@ -244,18 +235,18 @@ function ExercisePicker({ onClose, onSelect }) {
   );
 }
 
-// --- Workouts-scherm ---
+/* ---------- Workouts ---------- */
 function WorkoutsScreen({ onPickDay, data, onDelete, unit }) {
   return (
-    <div className="space-y-4">
-      <div className="border border-neutral-800 rounded-2xl p-4 bg-neutral-950 hit-card">
-        <h1 className="text-xl font-semibold mb-3 text-white section-title">Kies je workout</h1>
+    <div className="space-y-4 text-white">
+      <div className="hit-card">
+        <h1 className="text-xl font-semibold mb-3">Kies je workout</h1>
         <div className="grid grid-cols-1 gap-2">
           {dayOptions.map((d) => (
             <button
               key={d.key}
               onClick={() => onPickDay(d.key)}
-              className="text-left p-3 rounded-xl border border-neutral-800 hover:border-red-700 hover:bg-neutral-900 list-item"
+              className="list-item text-left hover:border-[#b91c1c]"
             >
               {d.label}
             </button>
@@ -264,14 +255,14 @@ function WorkoutsScreen({ onPickDay, data, onDelete, unit }) {
       </div>
 
       <div className="hit-card">
-        <h2 className="text-lg font-semibold mb-2 text-white section-title">Mijn Workouts</h2>
+        <h2 className="text-lg font-semibold mb-2">Mijn Workouts</h2>
         <HistoryList data={data} onDelete={onDelete} unit={unit} />
       </div>
     </div>
   );
 }
 
-// --- History ---
+/* ---------- History ---------- */
 function HistoryList({ data, onDelete, unit }) {
   if (!data.workouts.length) {
     return <div className="text-center text-muted py-8">Nog geen workouts opgeslagen.</div>;
@@ -282,15 +273,15 @@ function HistoryList({ data, onDelete, unit }) {
         .slice()
         .sort((a, b) => new Date(b.date) - new Date(a.date))
         .map((w) => (
-          <div key={w.id} className="rounded-2xl p-3 bg-neutral-950 text-white hit-card">
+          <div key={w.id} className="hit-card">
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-semibold">{w.dayName}</div>
+                <div className="font-semibold text-white">{w.dayName}</div>
                 <div className="text-xs text-muted">{formatDateEU(w.date)}</div>
               </div>
               <button
                 onClick={() => onDelete(w.id)}
-                className="p-2 rounded-lg border border-neutral-800 hover:border-red-700 btn btn-danger"
+                className="btn btn-danger"
                 title="Verwijderen"
               >
                 <Trash2 className="w-4 h-4" />
@@ -300,16 +291,16 @@ function HistoryList({ data, onDelete, unit }) {
               {w.sets.map((s, i) => {
                 const display = s.weightKg != null ? `${Math.round(fromKg(unit, s.weightKg) * 100) / 100} ${unit}` : "—";
                 return (
-                  <div key={i} className="bg-neutral-900 rounded-xl p-2 border border-neutral-800 list-item">
+                  <div key={i} className="list-item">
                     <div className="text-sm font-medium flex items-center gap-2">
                       <span className={`inline-block w-2 h-2 rounded-full ${s.done ? "bg-green-500" : "bg-neutral-600"}`}></span>
-                      {s.name}
+                      <span className="text-white">{s.name}</span>
                     </div>
                     <div className="text-xs text-muted">{s.note}</div>
-                    <div className="text-sm mt-1">
+                    <div className="text-sm mt-1 text-white">
                       {display}{s.reps ? ` × ${s.reps}` : ""}
                     </div>
-                    {s.noteText && <div className="text-xs text-neutral-300 mt-1">📝 {s.noteText}</div>}
+                    {s.noteText && <div className="text-xs text-white/90 mt-1">📝 {s.noteText}</div>}
                   </div>
                 );
               })}
@@ -320,7 +311,7 @@ function HistoryList({ data, onDelete, unit }) {
   );
 }
 
-// --- WorkoutForm ---
+/* ---------- WorkoutForm ---------- */
 function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
   const plan = dayKey === "custom"
     ? { name: `Losse oefening – ${customExerciseName}`, exercises: [{ name: customExerciseName, note: "Log je werkset(ten)" }] }
@@ -360,7 +351,7 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
       <div className="w-full max-w-2xl bg-neutral-950 border border-neutral-800 rounded-2xl shadow-xl p-4 max-h-[90vh] overflow-y-auto hit-card">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-lg font-semibold">{plan.name}</h2>
+            <h2 className="text-lg font-semibold text-white">{plan.name}</h2>
             <p className="text-sm text-muted">
               Datum (EU): {formatDateEU(date)} — Voer gewicht in ({unit.toUpperCase()}) en vink af wat je hebt gedaan.
             </p>
@@ -369,23 +360,24 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1 input"
+            className="input"
           />
         </div>
 
         <div className="space-y-2">
           {rows.map((row, idx) => (
-            <div key={idx} className="border border-neutral-800 rounded-xl p-3 flex flex-col gap-3 bg-neutral-950 list-item">
+            <div key={idx} className="list-item flex flex-col gap-3">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => toggleDone(idx)}
                   title="Gedaan"
-                  className={`rounded-lg p-2 border btn ${row.done ? "bg-red-700 border-red-700" : "border-neutral-800 hover:bg-neutral-900"}`}
+                  className={`btn ${row.done ? "btn-primary" : ""}`}
+                  style={{ width: 44, height: 44, padding: 0 }}
                 >
                   <CheckSquare className="w-5 h-5" />
                 </button>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium">{row.name}</div>
+                  <div className="font-medium text-white">{row.name}</div>
                   <div className="text-xs text-muted">{row.note}</div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -395,7 +387,7 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
                     inputMode="decimal"
                     value={row.weight}
                     onChange={(e) => updateField(idx, "weight", e.target.value)}
-                    className="w-28 border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1 input"
+                    className="input w-28"
                   />
                   <input
                     type="number"
@@ -403,17 +395,17 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
                     inputMode="numeric"
                     value={row.reps}
                     onChange={(e) => updateField(idx, "reps", e.target.value)}
-                    className="w-24 border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1 input"
+                    className="input w-24"
                   />
                 </div>
               </div>
               <div className="flex items-start gap-2">
-                <FileText className="w-4 h-4 text-accent mt-2" />
+                <FileText className="w-4 h-4 text-[#b91c1c] mt-2" />
                 <textarea
                   placeholder="Notitie (tempo, vorm, RIR, dropset-details, etc.)"
                   value={row.noteText}
                   onChange={(e) => updateField(idx, "noteText", e.target.value)}
-                  className="w-full border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1 textarea"
+                  className="textarea"
                   rows={2}
                 />
               </div>
@@ -422,10 +414,8 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onCancel} className="px-3 py-2 rounded-xl border border-neutral-800 hover:bg-neutral-900 btn">
-            Annuleren
-          </button>
-          <button onClick={handleSave} className="px-3 py-2 rounded-xl bg-red-700 text-white flex items-center gap-2 btn btn-primary">
+          <button onClick={onCancel} className="btn">Annuleren</button>
+          <button onClick={handleSave} className="btn btn-primary flex items-center gap-2">
             <Save className="w-4 h-4" /> Opslaan
           </button>
         </div>
@@ -434,7 +424,7 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
   );
 }
 
-// --- Progressie ---
+/* ---------- Progressie ---------- */
 function ProgressView({ data, unit }) {
   const [exercise, setExercise] = useState("");
   const [query, setQuery] = useState("");
@@ -475,7 +465,7 @@ function ProgressView({ data, unit }) {
     <div className="space-y-4 text-white">
       <div className="hit-card">
         <div className="flex items-center gap-2 mb-2">
-          <BarChart2 className="w-5 h-5 text-accent" />
+          <BarChart2 className="w-5 h-5 text-[#b91c1c]" />
           <div className="font-semibold text-lg">Progressie</div>
         </div>
 
@@ -487,7 +477,7 @@ function ProgressView({ data, unit }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Zoek een oefening… (typ om suggesties te zien)"
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 text-white input"
+                className="input pl-9"
               />
             </div>
             <button
@@ -498,7 +488,7 @@ function ProgressView({ data, unit }) {
                   setExercise(pick || "");
                 }
               }}
-              className="px-3 py-2 rounded-xl btn btn-primary"
+              className="btn btn-primary"
             >
               Kies
             </button>
@@ -521,9 +511,7 @@ function ProgressView({ data, unit }) {
             <button
               key={name}
               onClick={() => { setExercise(name); setQuery(name); }}
-              className={`text-left p-3 rounded-xl border list-item ${
-                exercise === name ? "border-red-700 bg-neutral-900" : "border-neutral-800 hover:border-red-700 hover:bg-neutral-900"
-              }`}
+              className={`list-item text-left ${exercise === name ? "border-[#b91c1c]" : "hover:border-[#b91c1c]"}`}
             >
               {name}
             </button>
@@ -532,9 +520,9 @@ function ProgressView({ data, unit }) {
       </div>
 
       {exercise ? (
-        <div className="hit-card chart-card">
+        <div className="chart-card">
           <div className="flex items-center justify-between mb-2">
-            <div className="font-semibold">{exercise}</div>
+            <div className="font-semibold text-white">{exercise}</div>
             {best !== null && <div className="text-sm">Beste: <span className="font-semibold">{best} {unit}</span></div>}
           </div>
           <div className="w-full h-72">
@@ -556,7 +544,7 @@ function ProgressView({ data, unit }) {
   );
 }
 
-// --- Settings ---
+/* ---------- Settings ---------- */
 function Settings({ data, setData }) {
   const setUnit = (unit) => {
     const next = { ...data, settings: { ...(data.settings || {}), unit } };
@@ -598,16 +586,16 @@ function Settings({ data, setData }) {
       <div className="hit-card">
         <div className="font-semibold mb-2">Eenheden</div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setUnit("kg")} className={`px-3 py-2 rounded-xl border btn ${data.settings?.unit === "kg" ? "btn-primary" : ""}`}>KG</button>
-          <button onClick={() => setUnit("lbs")} className={`px-3 py-2 rounded-xl border btn ${data.settings?.unit === "lbs" ? "btn-primary" : ""}`}>LBS</button>
+          <button onClick={() => setUnit("kg")} className={`btn ${data.settings?.unit === "kg" ? "btn-primary" : ""}`}>KG</button>
+          <button onClick={() => setUnit("lbs")} className={`btn ${data.settings?.unit === "lbs" ? "btn-primary" : ""}`}>LBS</button>
         </div>
       </div>
 
       <div className="hit-card">
         <div className="font-semibold mb-1">Backup</div>
         <div className="flex items-center gap-2">
-          <button onClick={exportData} className="px-3 py-2 rounded-xl border btn"><Download className="w-4 h-4 inline mr-2" /> Export</button>
-          <label className="px-3 py-2 rounded-xl border btn cursor-pointer">
+          <button onClick={exportData} className="btn"><Download className="w-4 h-4 inline mr-2" /> Export</button>
+          <label className="btn cursor-pointer">
             <Upload className="w-4 h-4 inline mr-2" /> Import
             <input type="file" accept="application/json" className="hidden" onChange={(e) => e.target.files?.[0] && importData(e.target.files[0])} />
           </label>
@@ -616,13 +604,13 @@ function Settings({ data, setData }) {
 
       <div className="hit-card">
         <div className="font-semibold mb-2">Data</div>
-        <button onClick={clearAll} className="px-3 py-2 rounded-xl border btn btn-danger">Alles wissen</button>
+        <button onClick={clearAll} className="btn btn-danger">Alles wissen</button>
       </div>
     </div>
   );
 }
 
-// --- Root ---
+/* ---------- Root ---------- */
 export default function App() {
   const [screen, setScreen] = useState("start");
   const [data, setData] = useState(() => loadData());
@@ -669,15 +657,13 @@ export default function App() {
             <h2 className="mb-4 text-white font-semibold">Kies je dag</h2>
             <div className="grid grid-cols-1 gap-2">
               {dayOptions.map((d) => (
-                <button key={d.key} onClick={() => pickDay(d.key)} className="text-left p-3 rounded-xl border border-neutral-800 hover:border-red-700 hover:bg-neutral-900 list-item">
+                <button key={d.key} onClick={() => pickDay(d.key)} className="list-item text-left hover:border-[#b91c1c]">
                   {d.label}
                 </button>
               ))}
             </div>
             <div className="mt-4 text-right">
-              <button onClick={() => setShowDayPicker(false)} className="px-4 py-2 rounded-xl border border-neutral-800 hover:bg-neutral-900 btn">
-                Annuleren
-              </button>
+              <button onClick={() => setShowDayPicker(false)} className="btn">Annuleren</button>
             </div>
           </div>
         </div>
