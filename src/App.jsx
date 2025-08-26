@@ -1,11 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { BarChart2, CheckSquare, Save, Trash2, Upload, Download, Scale, FileText, Search } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
+import { BarChart2, CheckSquare, Save, Trash2, Upload, Download, FileText, Search, PlusCircle } from "lucide-react";
 
-// ----------------------------------------------------
-// Config & helpers
-// ----------------------------------------------------
-const STORAGE_KEY = "high_intensity_training_by_joost_v1";
+const STORAGE_KEY = "high_intensity_training_by_joost_v2";
 const KG_PER_LB = 0.45359237;
 const LB_PER_KG = 1 / KG_PER_LB;
 
@@ -23,9 +20,7 @@ function loadData() {
     return { workouts: [], settings: { unit: "kg" } };
   }
 }
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
+function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 function formatDateEU(d) {
   const dt = new Date(d);
   const day = String(dt.getDate()).padStart(2, "0");
@@ -33,76 +28,50 @@ function formatDateEU(d) {
   const year = dt.getFullYear();
   return `${day}-${month}-${year}`;
 }
-function toKg(unit, value) {
-  const v = Number(value);
-  if (!v && v !== 0) return 0;
-  return unit === "lbs" ? v * KG_PER_LB : v;
-}
-function fromKg(unit, kg) {
-  const v = Number(kg || 0);
-  return unit === "lbs" ? v * LB_PER_KG : v;
-}
+function toKg(unit, value) { const v = Number(value); if (!v && v !== 0) return 0; return unit === "lbs" ? v * KG_PER_LB : v; }
+function fromKg(unit, kg) { const v = Number(kg || 0); return unit === "lbs" ? v * LB_PER_KG : v; }
 
-// ----------------------------------------------------
-// Oefeningenschema (Mentzer-stijl)
-// ----------------------------------------------------
+// ---------------- Plan ----------------
 const EXERCISE_PLAN = {
-  day1: {
-    name: "Dag 1 – Legs + Calves + Abs",
-    exercises: [
-      { name: "Squat", note: "1 werkset 6–10" },
-      { name: "Leg Press (machine)", note: "1 werkset 8–12 + 1–2 dropsets" },
-      { name: "Romanian Deadlift", note: "1 werkset 6–10" },
-      { name: "Leg Curl (machine)", note: "1 werkset 8–12 + dropset" },
-      { name: "Standing Calf Raise (machine)", note: "1 werkset 10–15 + 2 dropsets" },
-      { name: "Hanging Leg Raises", note: "1 set tot falen (10–20)" },
-      { name: "Ab Wheel Rollout", note: "1 set 8–12" }
-    ]
-  },
-  day2: {
-    name: "Dag 2 – Upper Body",
-    exercises: [
-      { name: "Bench Press", note: "1 werkset 6–10" },
-      { name: "Pull-Up / Lat Pulldown", note: "1 werkset 6–10" },
-      { name: "Incline Chest Press (machine)", note: "1 werkset 8–12 + dropset" },
-      { name: "Seated Row (machine)", note: "1 werkset 8–12 + dropset" },
-      { name: "Machine Chest Fly", note: "1 werkset 8–12 + dropset" },
-      { name: "Barbell Curl", note: "1 werkset 6–10" },
-      { name: "Rope Pushdown (cable)", note: "1 werkset 8–12 + dropset" }
-    ]
-  },
-  day3: {
-    name: "Dag 3 – Shoulders + Calves + Cardio",
-    exercises: [
-      { name: "Overhead Press", note: "1 werkset 6–10" },
-      { name: "Lateral Raise (dumbbell/machine)", note: "1 werkset 10–12 + dropset" },
-      { name: "Rear Delt Fly (machine)", note: "1 werkset 10–12 + dropset" },
-      { name: "Upright Row", note: "1 werkset 6–10" },
-      { name: "Seated Calf Raise (machine)", note: "1 werkset 12–15 + dropset" },
-      { name: "Ab Coaster", note: "3 sets tot falen" },
-      { name: "Hanging Leg Raises", note: "2 sets tot falen" },
-      { name: "Steady State Cardio", note: "30–40 min zone 2" }
-    ]
-  },
-  day4: {
-    name: "Dag 4 – Cardio / Active Recovery",
-    exercises: [
-      { name: "Steady State Cardio", note: "45–60 min zone 2" },
-      { name: "Core stabiliteit (side planks, pallof press)", note: "optioneel" }
-    ]
-  }
+  day1: { name: "Dag 1 – Legs + Calves + Abs", exercises: [
+    { name: "Squat", note: "1 werkset 6–10" },
+    { name: "Leg Press (machine)", note: "1 werkset 8–12 + 1–2 dropsets" },
+    { name: "Romanian Deadlift", note: "1 werkset 6–10" },
+    { name: "Leg Curl (machine)", note: "1 werkset 8–12 + dropset" },
+    { name: "Standing Calf Raise (machine)", note: "1 werkset 10–15 + 2 dropsets" },
+    { name: "Hanging Leg Raises", note: "1 set tot falen (10–20)" },
+    { name: "Ab Wheel Rollout", note: "1 set 8–12" }
+  ]},
+  day2: { name: "Dag 2 – Upper Body", exercises: [
+    { name: "Bench Press", note: "1 werkset 6–10" },
+    { name: "Pull-Up / Lat Pulldown", note: "1 werkset 6–10" },
+    { name: "Incline Chest Press (machine)", note: "1 werkset 8–12 + dropset" },
+    { name: "Seated Row (machine)", note: "1 werkset 8–12 + dropset" },
+    { name: "Machine Chest Fly", note: "1 werkset 8–12 + dropset" },
+    { name: "Barbell Curl", note: "1 werkset 6–10" },
+    { name: "Rope Pushdown (cable)", note: "1 werkset 8–12 + dropset" }
+  ]},
+  day3: { name: "Dag 3 – Shoulders + Calves + Cardio", exercises: [
+    { name: "Overhead Press", note: "1 werkset 6–10" },
+    { name: "Lateral Raise (dumbbell/machine)", note: "1 werkset 10–12 + dropset" },
+    { name: "Rear Delt Fly (machine)", note: "1 werkset 10–12 + dropset" },
+    { name: "Upright Row", note: "1 werkset 6–10" },
+    { name: "Seated Calf Raise (machine)", note: "1 werkset 12–15 + dropset" },
+    { name: "Ab Coaster", note: "3 sets tot falen" },
+    { name: "Hanging Leg Raises", note: "2 sets tot falen" },
+    { name: "Steady State Cardio", note: "30–40 min zone 2" }
+  ]},
+  day4: { name: "Dag 4 – Cardio / Active Recovery", exercises: [
+    { name: "Steady State Cardio", note: "45–60 min zone 2" },
+    { name: "Core stabiliteit (side planks, pallof press)", note: "optioneel" }
+  ]}
 };
-
 const dayOptions = [
   { key: "day1", label: EXERCISE_PLAN.day1.name },
   { key: "day2", label: EXERCISE_PLAN.day2.name },
   { key: "day3", label: EXERCISE_PLAN.day3.name },
   { key: "day4", label: EXERCISE_PLAN.day4.name }
 ];
-
-// ----------------------------------------------------
-// Extra compound free-weight oefeningen (voor Start Exercise/Progressie)
-// ----------------------------------------------------
 const ADDITIONAL_COMPOUND_EXERCISES = [
   "Front Squat","Low-Bar Back Squat","High-Bar Back Squat","Paused Squat","Deficit Deadlift",
   "Conventional Deadlift","Sumo Deadlift","Snatch-Grip Deadlift","Trap Bar Deadlift","Barbell Hip Thrust",
@@ -114,50 +83,26 @@ const ADDITIONAL_COMPOUND_EXERCISES = [
   "Pull-Up","Chin-Up","Power Clean","Power Snatch","Push Jerk"
 ];
 
-// ----------------------------------------------------
-// Topbar (logo = home knop)
-// ----------------------------------------------------
+// ---------------- UI: Topbar ----------------
 function TopBar({ current, onNavigate, unit, onToggleUnit }) {
   return (
     <div className="sticky top-0 z-10 bg-neutral-950 border-b border-red-900 text-white">
       <div className="mx-auto max-w-3xl px-4 py-3">
         <div className="flex items-center gap-3">
-          {/* Klikbaar logo -> Start */}
-          <button
-            onClick={() => onNavigate("start")}
-            className="flex items-center gap-3 min-w-0 group"
-            aria-label="Ga naar Start"
-          >
-            <img
-              src="/unnamed-192.png"
-              alt="App logo"
-              className="w-10 h-10 rounded-full object-cover border-2 border-red-700 group-active:scale-95"
-            />
+          <button onClick={() => onNavigate("start")} className="flex items-center gap-3 min-w-0 group" aria-label="Ga naar Start">
+            <img src="/unnamed-192.png" alt="App logo" className="w-10 h-10 rounded-full object-cover border-2 border-red-700 group-active:scale-95" />
             <div className="font-semibold leading-tight text-left text-lg sm:text-xl break-words">
-              <div>High Intensity</div>
-              <div>Training by Joost</div>
+              <div>High Intensity</div><div>Training by Joost</div>
             </div>
           </button>
-
-          {/* Dropdown + unit toggle */}
           <div className="ml-auto flex items-center gap-2">
-            <select
-              value={current}
-              onChange={(e) => onNavigate(e.target.value)}
-              className="bg-neutral-900 border border-neutral-700 text-white rounded-xl px-3 py-2"
-              aria-label="Navigatie"
-            >
+            <select value={current} onChange={(e) => onNavigate(e.target.value)} className="bg-neutral-900 border border-neutral-700 text-white rounded-xl px-3 py-2" aria-label="Navigatie">
               <option value="start">Start</option>
               <option value="home">Workouts</option>
               <option value="progress">Progressie</option>
               <option value="settings">Instellingen</option>
             </select>
-
-            <button
-              onClick={onToggleUnit}
-              className="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700"
-              title="Wissel eenheid"
-            >
+            <button onClick={onToggleUnit} className="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700" title="Wissel eenheid">
               {unit.toUpperCase()}
             </button>
           </div>
@@ -167,9 +112,7 @@ function TopBar({ current, onNavigate, unit, onToggleUnit }) {
   );
 }
 
-// ----------------------------------------------------
-// Quotes (roteren elke 10s)
-// ----------------------------------------------------
+// ---------------- Quotes ----------------
 const QUOTES = [
   { who: "Arnold Schwarzenegger", text: "The last three or four reps is what makes the muscle grow." },
   { who: "Arnold Schwarzenegger", text: "Strength does not come from winning. Your struggles develop your strengths." },
@@ -177,45 +120,35 @@ const QUOTES = [
   { who: "Mike Mentzer", text: "Hard work isn’t enough—training must be brief, intense and infrequent." }
 ];
 
-// ----------------------------------------------------
-// Startpagina
-// ----------------------------------------------------
-function StartScreen({ onStartWorkout, onStartExercise }) {
+// ---------------- Start ----------------
+function StartScreen({ onStartWorkout, onStartExercise, onQuickLog }) {
   const [idx, setIdx] = useState(0);
   const q = QUOTES[idx];
-  useEffect(() => {
-    const id = setInterval(() => setIdx((p) => (p + 1) % QUOTES.length), 10000);
-    return () => clearInterval(id);
-  }, []);
+  useEffect(() => { const id = setInterval(() => setIdx((p) => (p + 1) % QUOTES.length), 10000); return () => clearInterval(id); }, []);
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-white text-center px-6 gap-6">
       <div className="max-w-2xl">
         <blockquote className="text-2xl sm:text-3xl font-semibold leading-tight">“{q.text}”</blockquote>
         <p className="mt-3 text-neutral-400">— {q.who}</p>
       </div>
-      <div className="flex flex-col sm:flex-row gap-4 mt-4">
-        <button
-          onClick={onStartWorkout}
-          className="px-8 py-4 rounded-2xl bg-red-700 hover:bg-red-600 text-white text-xl sm:text-2xl font-bold shadow-lg active:scale-95"
-        >
+      <div className="flex flex-col sm:flex-row gap-3 mt-4">
+        <button onClick={onStartWorkout} className="px-8 py-4 rounded-2xl bg-red-700 hover:bg-red-600 text-white text-xl sm:text-2xl font-bold shadow-lg active:scale-95">
           Start Workout
         </button>
-        <button
-          onClick={onStartExercise}
-          className="px-8 py-4 rounded-2xl bg-neutral-900 border border-neutral-700 hover:border-red-700 text-white text-xl sm:text-2xl font-bold shadow-lg active:scale-95"
-        >
+        <button onClick={onStartExercise} className="px-8 py-4 rounded-2xl bg-neutral-900 border border-neutral-700 hover:border-red-700 text-white text-xl sm:text-2xl font-bold shadow-lg active:scale-95">
           Start Exercise
+        </button>
+        <button onClick={onQuickLog} className="px-6 py-4 rounded-2xl bg-neutral-900 border border-neutral-700 hover:border-red-700 text-white text-lg font-semibold shadow active:scale-95 flex items-center gap-2">
+          <PlusCircle className="w-5 h-5" /> Snel loggen
         </button>
       </div>
     </div>
   );
 }
 
-// ----------------------------------------------------
-// ExercisePicker (zoek + typeahead) voor "Start Exercise"
-// ----------------------------------------------------
 const norm = (s) => s.toLowerCase().replace(/\s+/g, " ").trim();
 
+// ---------------- ExercisePicker ----------------
 function ExercisePicker({ onClose, onSelect }) {
   const builtIn = useMemo(() => {
     const set = new Set();
@@ -246,13 +179,7 @@ function ExercisePicker({ onClose, onSelect }) {
           </div>
         </div>
 
-        <input
-          autoFocus
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Zoek (typ en krijg suggesties)…"
-          className="w-full border border-neutral-700 bg-neutral-900 text-white rounded-xl px-3 py-2 mb-2"
-        />
+        <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Zoek (typ en krijg suggesties)…" className="w-full border border-neutral-700 bg-neutral-900 text-white rounded-xl px-3 py-2 mb-2" />
 
         {suggestions.length > 0 && (
           <div className="mb-3 text-sm text-neutral-300">
@@ -267,11 +194,7 @@ function ExercisePicker({ onClose, onSelect }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {filtered.map((name) => (
-            <button
-              key={name}
-              onClick={() => onSelect(name)}
-              className="text-left p-3 rounded-xl border border-neutral-800 hover:border-red-700 hover:bg-neutral-900"
-            >
+            <button key={name} onClick={() => onSelect(name)} className="text-left p-3 rounded-xl border border-neutral-800 hover:border-red-700 hover:bg-neutral-900">
               {name}
             </button>
           ))}
@@ -281,9 +204,7 @@ function ExercisePicker({ onClose, onSelect }) {
   );
 }
 
-// ----------------------------------------------------
-// Workouts-scherm: 4 opties onder elkaar + geschiedenis
-// ----------------------------------------------------
+// ---------------- Workouts & History ----------------
 function WorkoutsScreen({ onPickDay, data, onDelete, unit }) {
   return (
     <div className="space-y-4">
@@ -291,11 +212,7 @@ function WorkoutsScreen({ onPickDay, data, onDelete, unit }) {
         <h1 className="text-xl font-semibold mb-3 text-white">Kies je workout</h1>
         <div className="grid grid-cols-1 gap-2">
           {dayOptions.map((d) => (
-            <button
-              key={d.key}
-              onClick={() => onPickDay(d.key)}
-              className="text-left p-3 rounded-xl border border-neutral-800 hover:border-red-700 hover:bg-neutral-900 text-white"
-            >
+            <button key={d.key} onClick={() => onPickDay(d.key)} className="text-left p-3 rounded-xl border border-neutral-800 hover:border-red-700 hover:bg-neutral-900 text-white">
               {d.label}
             </button>
           ))}
@@ -310,18 +227,84 @@ function WorkoutsScreen({ onPickDay, data, onDelete, unit }) {
   );
 }
 
-// ----------------------------------------------------
-// WorkoutForm (log sets/reps/gewicht/notities)
-// ----------------------------------------------------
+// Bepaal PR (beste tot en met die datum)
+function isPRForExercise(workouts, exerciseName, currentWorkout) {
+  const upToDate = workouts.filter(w => new Date(w.date) <= new Date(currentWorkout.date));
+  const bestBefore = Math.max(
+    0,
+    ...upToDate.flatMap(w => w.sets
+      .filter(s => s.name === exerciseName && s.weightKg != null)
+      .map(s => s.weightKg))
+  );
+  const currentBest = Math.max(
+    0,
+    ...currentWorkout.sets
+      .filter(s => s.name === exerciseName && s.weightKg != null)
+      .map(s => s.weightKg)
+  );
+  return currentBest > (bestBefore - 1e-9); // kleine float marge
+}
+
+function HistoryList({ data, onDelete, unit }) {
+  if (!data.workouts.length) return <div className="text-center text-neutral-400 py-8">Nog geen workouts opgeslagen.</div>;
+
+  return (
+    <div className="space-y-3">
+      {data.workouts.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).map((w) => {
+        // Verzamel PR’s (per oefening)
+        const prs = new Set();
+        for (const s of w.sets) {
+          if (s.weightKg != null && isPRForExercise(data.workouts, s.name, w)) {
+            prs.add(s.name);
+          }
+        }
+        return (
+          <div key={w.id} className="border border-neutral-800 rounded-2xl p-3 bg-neutral-950 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-semibold">{w.dayName}</div>
+                <div className="text-xs text-neutral-400">{formatDateEU(w.date)}</div>
+              </div>
+              <button onClick={() => onDelete(w.id)} className="p-2 rounded-lg border border-neutral-800 hover:border-red-700" title="Verwijderen">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {w.sets.map((s, i) => {
+                const display = s.weightKg != null ? `${Math.round(fromKg(unit, s.weightKg) * 100) / 100} ${unit}` : "—";
+                const pr = prs.has(s.name);
+                return (
+                  <div key={i} className={`rounded-xl p-2 ${pr ? "bg-neutral-900 border border-red-700" : "bg-neutral-900 border border-neutral-800"}`}>
+                    <div className="text-sm font-medium flex items-center gap-2">
+                      <span className={`inline-block w-2 h-2 rounded-full ${s.done ? "bg-green-500" : "bg-neutral-600"}`}></span>
+                      {s.name}
+                      {pr && <span className="ml-2 text-xs text-red-400 font-semibold">PR 🔥</span>}
+                    </div>
+                    <div className="text-xs text-neutral-400">{s.note}</div>
+                    <div className="text-sm mt-1">
+                      {display}{s.reps ? ` × ${s.reps}` : ""}
+                    </div>
+                    {s.noteText && <div className="text-xs text-neutral-300 mt-1">📝 {s.noteText}</div>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------------- WorkoutForm ----------------
 function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
   const plan = dayKey === "custom"
     ? { name: `Losse oefening – ${customExerciseName}`, exercises: [{ name: customExerciseName, note: "Log je werkset(ten)" }] }
     : EXERCISE_PLAN[dayKey];
 
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [rows, setRows] = useState(() =>
-    plan.exercises.map((ex) => ({ name: ex.name, note: ex.note, weight: "", reps: "", done: false, noteText: "" }))
-  );
+  const [rows, setRows] = useState(() => plan.exercises.map((ex) => ({ name: ex.name, note: ex.note, weight: "", reps: "", done: false, noteText: "" })));
 
   const toggleDone = (idx) => setRows((r) => r.map((row, i) => (i === idx ? { ...row, done: !row.done } : row)));
   const updateField = (idx, field, value) => setRows((r) => r.map((row, i) => (i === idx ? { ...row, [field]: value } : row)));
@@ -335,13 +318,8 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
       dayName: plan.name,
       unitAtEntry: unit,
       sets: rows.map((s) => ({
-        name: s.name,
-        note: s.note,
-        done: s.done,
-        reps: s.reps,
-        noteText: s.noteText,
-        enteredWeight: s.weight,
-        weightKg: s.weight ? toKg(unit, s.weight) : null
+        name: s.name, note: s.note, done: s.done, reps: s.reps, noteText: s.noteText,
+        enteredWeight: s.weight, weightKg: s.weight ? toKg(unit, s.weight) : null
       }))
     };
     onSave(payload);
@@ -357,23 +335,14 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
               Datum (EU): {formatDateEU(date)} — Voer gewicht in ({unit.toUpperCase()}) en vink af wat je hebt gedaan.
             </p>
           </div>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1"
-          />
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1" />
         </div>
 
         <div className="space-y-2">
           {rows.map((row, idx) => (
             <div key={idx} className="border border-neutral-800 rounded-xl p-3 flex flex-col gap-3 bg-neutral-950">
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => toggleDone(idx)}
-                  title="Gedaan"
-                  className={`rounded-lg p-2 border ${row.done ? "bg-red-700 border-red-700" : "border-neutral-800 hover:bg-neutral-900"}`}
-                >
+                <button onClick={() => toggleDone(idx)} title="Gedaan" className={`rounded-lg p-2 border ${row.done ? "bg-red-700 border-red-700" : "border-neutral-800 hover:bg-neutral-900"}`}>
                   <CheckSquare className="w-5 h-5" />
                 </button>
                 <div className="flex-1 min-w-0">
@@ -381,108 +350,33 @@ function WorkoutForm({ dayKey, onSave, onCancel, unit, customExerciseName }) {
                   <div className="text-xs text-neutral-400">{row.note}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    placeholder={`gewicht (${unit})`}
-                    inputMode="decimal"
-                    value={row.weight}
-                    onChange={(e) => updateField(idx, "weight", e.target.value)}
-                    className="w-28 border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1"
-                  />
-                  <input
-                    type="number"
-                    placeholder="reps"
-                    inputMode="numeric"
-                    value={row.reps}
-                    onChange={(e) => updateField(idx, "reps", e.target.value)}
-                    className="w-24 border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1"
-                  />
+                  <input type="number" placeholder={`gewicht (${unit})`} inputMode="decimal" value={row.weight} onChange={(e) => updateField(idx, "weight", e.target.value)} className="w-28 border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1" />
+                  <input type="number" placeholder="reps" inputMode="numeric" value={row.reps} onChange={(e) => updateField(idx, "reps", e.target.value)} className="w-24 border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1" />
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <FileText className="w-4 h-4 text-red-500 mt-2" />
-                <textarea
-                  placeholder="Notitie (tempo, vorm, RIR, dropset-details, etc.)"
-                  value={row.noteText}
-                  onChange={(e) => updateField(idx, "noteText", e.target.value)}
-                  className="w-full border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1"
-                  rows={2}
-                />
+                <textarea placeholder="Notitie (tempo, vorm, RIR, dropset-details, etc.)" value={row.noteText} onChange={(e) => updateField(idx, "noteText", e.target.value)} className="w-full border border-neutral-700 bg-neutral-900 text-white rounded-lg px-2 py-1" rows={2} />
               </div>
             </div>
           ))}
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onCancel} className="px-3 py-2 rounded-xl border border-neutral-800 hover:bg-neutral-900">
-            Annuleren
-          </button>
-          <button onClick={handleSave} className="px-3 py-2 rounded-xl bg-red-700 text-white flex items-center gap-2">
-            <Save className="w-4 h-4" /> Opslaan
-          </button>
+          <button onClick={onCancel} className="px-3 py-2 rounded-xl border border-neutral-800 hover:bg-neutral-900">Annuleren</button>
+          <button onClick={handleSave} className="px-3 py-2 rounded-xl bg-red-700 text-white flex items-center gap-2"><Save className="w-4 h-4" /> Opslaan</button>
         </div>
       </div>
     </div>
   );
 }
 
-// ----------------------------------------------------
-// History (lijst)
-// ----------------------------------------------------
-function HistoryList({ data, onDelete, unit }) {
-  if (!data.workouts.length) {
-    return <div className="text-center text-neutral-400 py-8">Nog geen workouts opgeslagen.</div>;
-  }
-  return (
-    <div className="space-y-3">
-      {data.workouts
-        .slice()
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .map((w) => (
-          <div key={w.id} className="border border-neutral-800 rounded-2xl p-3 bg-neutral-950 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-semibold">{w.dayName}</div>
-                <div className="text-xs text-neutral-400">{formatDateEU(w.date)}</div>
-              </div>
-              <button
-                onClick={() => onDelete(w.id)}
-                className="p-2 rounded-lg border border-neutral-800 hover:border-red-700"
-                title="Verwijderen"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {w.sets.map((s, i) => {
-                const display = s.weightKg != null ? `${Math.round(fromKg(unit, s.weightKg) * 100) / 100} ${unit}` : "—";
-                return (
-                  <div key={i} className="bg-neutral-900 rounded-xl p-2">
-                    <div className="text-sm font-medium flex items-center gap-2">
-                      <span className={`inline-block w-2 h-2 rounded-full ${s.done ? "bg-green-500" : "bg-neutral-600"}`}></span>
-                      {s.name}
-                    </div>
-                    <div className="text-xs text-neutral-400">{s.note}</div>
-                    <div className="text-sm mt-1">
-                      {display}{s.reps ? ` × ${s.reps}` : ""}
-                    </div>
-                    {s.noteText && <div className="text-xs text-neutral-300 mt-1">📝 {s.noteText}</div>}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-    </div>
-  );
-}
-
-// ----------------------------------------------------
-// Progressie (zoek + typeahead + grafiek)
-// ----------------------------------------------------
+// ---------------- Progress (zoek + typeahead + vergelijking) ----------------
 function ProgressView({ data, unit }) {
-  const [exercise, setExercise] = useState("");
-  const [query, setQuery] = useState("");
+  const [exerciseA, setExerciseA] = useState("");
+  const [exerciseB, setExerciseB] = useState(""); // nieuw: vergelijking
+  const [queryA, setQueryA] = useState("");
+  const [queryB, setQueryB] = useState("");
 
   const allExercises = useMemo(() => {
     const names = new Set();
@@ -492,29 +386,31 @@ function ProgressView({ data, unit }) {
     return Array.from(names).sort();
   }, [data]);
 
-  const suggestions = useMemo(() => {
-    const q = norm(query);
-    if (!q) return [];
-    return allExercises.filter((n) => norm(n).startsWith(q)).slice(0, 6);
-  }, [allExercises, query]);
+  const suggestions = (q) => {
+    const n = norm(q);
+    if (!n) return [];
+    return allExercises.filter((x) => norm(x).startsWith(n)).slice(0, 6);
+  };
+  const filtered = (q) => {
+    const n = norm(q);
+    if (!n) return allExercises.slice(0, 60);
+    return allExercises.filter((x) => norm(x).includes(n)).slice(0, 60);
+  };
 
-  const filtered = useMemo(() => {
-    const q = norm(query);
-    if (!q) return allExercises.slice(0, 60);
-    return allExercises.filter((n) => norm(n).includes(q)).slice(0, 60);
-  }, [allExercises, query]);
-
-  const chartData = useMemo(() => {
-    if (!exercise) return [];
-    const points = [];
+  const seriesFor = (name) => {
+    if (!name) return [];
+    const pts = [];
     for (const w of data.workouts) {
-      const match = w.sets.find((s) => s.name === exercise && s.weightKg != null);
-      if (match) points.push({ date: w.date, weight: Math.round(fromKg(unit, match.weightKg) * 100) / 100 });
+      const match = w.sets.find((s) => s.name === name && s.weightKg != null);
+      if (match) pts.push({ date: w.date, weight: Math.round(fromKg(unit, match.weightKg) * 100) / 100 });
     }
-    return points.sort((a, b) => new Date(a.date) - new Date(b.date));
-  }, [data, exercise, unit]);
+    return pts.sort((a, b) => new Date(a.date) - new Date(b.date));
+  };
 
-  const best = chartData.length ? Math.max(...chartData.map((p) => p.weight)) : null;
+  const dataA = useMemo(() => seriesFor(exerciseA), [data, exerciseA, unit]);
+  const dataB = useMemo(() => seriesFor(exerciseB), [data, exerciseB, unit]);
+  const bestA = dataA.length ? Math.max(...dataA.map((p) => p.weight)) : null;
+  const bestB = dataB.length ? Math.max(...dataB.map((p) => p.weight)) : null;
 
   return (
     <div className="space-y-4 text-white">
@@ -524,119 +420,113 @@ function ProgressView({ data, unit }) {
           <div className="font-semibold text-lg">Progressie</div>
         </div>
 
-        <div className="relative">
+        {/* Oefening A */}
+        <div className="mb-4">
           <div className="flex items-center gap-2">
             <div className="flex-1 relative">
               <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Zoek een oefening… (typ om suggesties te zien)"
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 text-white"
-              />
+              <input value={queryA} onChange={(e) => setQueryA(e.target.value)} placeholder="Zoek oefening A…" className="w-full pl-9 pr-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 text-white" />
             </div>
-            <button
-              onClick={() => {
-                if (query) {
-                  const exact = allExercises.find((n) => norm(n) === norm(query));
-                  const pick = exact || suggestions[0] || filtered[0] || "";
-                  setExercise(pick || "");
-                }
-              }}
-              className="px-3 py-2 rounded-xl bg-red-700 hover:bg-red-600"
-            >
-              Kies
+            <button onClick={() => { const pick = allExercises.find(n => norm(n) === norm(queryA)) || suggestions(queryA)[0] || filtered(queryA)[0] || ""; setExerciseA(pick); setQueryA(pick); }} className="px-3 py-2 rounded-xl bg-red-700 hover:bg-red-600">
+              Kies A
             </button>
           </div>
-
-          {suggestions.length > 0 && (
+          {suggestions(queryA).length > 0 && (
             <div className="mt-2 text-sm text-neutral-300">
-              Suggesties:{" "}
-              {suggestions.map((s, i) => (
-                <button key={s} onClick={() => { setExercise(s); setQuery(s); }} className="underline hover:text-white mr-2">
-                  {s}{i < suggestions.length - 1 ? "," : ""}
-                </button>
+              Suggesties: {suggestions(queryA).map((s, i) => (
+                <button key={s} onClick={() => { setExerciseA(s); setQueryA(s); }} className="underline hover:text-white mr-2">{s}{i < suggestions(queryA).length - 1 ? "," : ""}</button>
               ))}
             </div>
           )}
         </div>
 
+        {/* Oefening B (vergelijking) */}
+        <div className="mb-2">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 relative">
+              <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input value={queryB} onChange={(e) => setQueryB(e.target.value)} placeholder="Zoek oefening B (optioneel)…" className="w-full pl-9 pr-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 text-white" />
+            </div>
+            <button onClick={() => { const pick = allExercises.find(n => norm(n) === norm(queryB)) || suggestions(queryB)[0] || filtered(queryB)[0] || ""; setExerciseB(pick); setQueryB(pick); }} className="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-red-700">
+              Kies B
+            </button>
+            {exerciseB && (
+              <button onClick={() => { setExerciseB(""); setQueryB(""); }} className="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-red-700">
+                Wis B
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Lijsten met snelle knoppen */}
         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {filtered.map((name) => (
-            <button
-              key={name}
-              onClick={() => { setExercise(name); setQuery(name); }}
-              className={`text-left p-3 rounded-xl border ${
-                exercise === name ? "border-red-700 bg-neutral-900" : "border-neutral-800 hover:border-red-700 hover:bg-neutral-900"
-              }`}
-            >
+          {(queryA ? filtered(queryA) : allExercises.slice(0, 30)).map((name) => (
+            <button key={`A-${name}`} onClick={() => { setExerciseA(name); setQueryA(name); }} className={`text-left p-3 rounded-xl border ${exerciseA === name ? "border-red-700 bg-neutral-900" : "border-neutral-800 hover:border-red-700 hover:bg-neutral-900"}`}>
+              {name}
+            </button>
+          ))}
+          {(queryB ? filtered(queryB) : allExercises.slice(30, 60)).map((name) => (
+            <button key={`B-${name}`} onClick={() => { setExerciseB(name); setQueryB(name); }} className={`text-left p-3 rounded-xl border ${exerciseB === name ? "border-red-700 bg-neutral-900" : "border-neutral-800 hover:border-red-700 hover:bg-neutral-900"}`}>
               {name}
             </button>
           ))}
         </div>
       </div>
 
-      {exercise ? (
+      {(exerciseA || exerciseB) ? (
         <div className="border border-neutral-800 rounded-2xl p-3 bg-neutral-950">
           <div className="flex items-center justify-between mb-2">
-            <div className="font-semibold">{exercise}</div>
-            {best !== null && <div className="text-sm">Beste: <span className="font-semibold">{best} {unit}</span></div>}
+            <div className="font-semibold">
+              {exerciseA || "—"} {bestA != null && <span className="text-sm text-neutral-300">(beste: {bestA} {unit})</span>}
+              {exerciseB && <>  •  {exerciseB} {bestB != null && <span className="text-sm text-neutral-300">(beste: {bestB} {unit})</span>}</>}
+            </div>
           </div>
           <div className="w-full h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
+              <LineChart margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" tickFormatter={(v) => formatDateEU(v)} />
+                <XAxis dataKey="date" type="category" allowDuplicatedCategory={false}
+                       tickFormatter={(v) => formatDateEU(v)}
+                       // combineer datapunten door twee datasets te mappen naar dezelfde as
+                       />
                 <YAxis tickFormatter={(v) => `${v}${unit}`} />
                 <Tooltip formatter={(v) => `${v} ${unit}`} labelFormatter={(l) => formatDateEU(l)} />
-                <Line type="monotone" dataKey="weight" stroke="#b91c1c" dot />
+                <Legend />
+                {exerciseA && <Line data={dataA} type="monotone" dataKey="weight" name={exerciseA} stroke="#b91c1c" dot />}
+                {exerciseB && <Line data={dataB} type="monotone" dataKey="weight" name={exerciseB} stroke="#22c55e" dot />}
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
       ) : (
-        <div className="text-neutral-400 text-sm">Kies een oefening via de zoekbalk of lijst om je progressie te zien.</div>
+        <div className="text-neutral-400 text-sm">Kies oefening A (en eventueel B) om je progressie te zien of te vergelijken.</div>
       )}
     </div>
   );
 }
 
-// ----------------------------------------------------
-// Settings (units + backup)
-// ----------------------------------------------------
+// ---------------- Settings ----------------
 function Settings({ data, setData }) {
-  const setUnit = (unit) => {
-    const next = { ...data, settings: { ...(data.settings || {}), unit } };
-    setData(next);
-    saveData(next);
-  };
+  const setUnit = (unit) => { const next = { ...data, settings: { ...(data.settings || {}), unit } }; setData(next); saveData(next); };
   const exportData = () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `hit_joost_backup_${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
+    const a = document.createElement("a"); a.href = url;
+    a.download = `hit_joost_backup_${new Date().toISOString().slice(0, 10)}.json`; a.click();
     URL.revokeObjectURL(url);
   };
   const importData = (file) => {
     const reader = new FileReader();
     reader.onload = () => {
-      try {
-        const json = JSON.parse(reader.result);
-        setData(json);
-        saveData(json);
-      } catch {
-        alert("Ongeldig backup bestand");
-      }
+      try { const json = JSON.parse(reader.result); setData(json); saveData(json); }
+      catch { alert("Ongeldig backup bestand"); }
     };
     reader.readAsText(file);
   };
   const clearAll = () => {
     if (confirm("Alles verwijderen?")) {
       const empty = { workouts: [], settings: { unit: data.settings?.unit || "kg" } };
-      setData(empty);
-      saveData(empty);
+      setData(empty); saveData(empty);
     }
   };
 
@@ -669,9 +559,7 @@ function Settings({ data, setData }) {
   );
 }
 
-// ----------------------------------------------------
-// Root App
-// ----------------------------------------------------
+// ---------------- Root ----------------
 export default function App() {
   const [screen, setScreen] = useState("start");
   const [data, setData] = useState(() => loadData());
@@ -685,15 +573,11 @@ export default function App() {
 
   const unit = data.settings?.unit || "kg";
 
-  // openers
   const openDayPicker = () => setShowDayPicker(true);
   const openExercisePicker = () => setShowExercisePicker(true);
-
-  // keuzes
   const pickDay = (key) => { setDayForForm(key); setShowDayPicker(false); };
   const selectExercise = (name) => { setCustomExerciseName(name); setDayForForm("custom"); setShowExercisePicker(false); };
 
-  // data opslaan/verwijderen
   const handleSaveWorkout = (payload) => { setData((prev) => ({ ...prev, workouts: [...prev.workouts, payload] })); setDayForForm(null); setCustomExerciseName(null); };
   const handleDeleteWorkout = (id) => setData((prev) => ({ ...prev, workouts: prev.workouts.filter((w) => w.id !== id) }));
 
@@ -708,7 +592,11 @@ export default function App() {
       <TopBar current={screen} onNavigate={setScreen} unit={unit} onToggleUnit={toggleUnit} />
 
       <main className="mx-auto max-w-3xl px-4 py-4">
-        {screen === "start" && <StartScreen onStartWorkout={openDayPicker} onStartExercise={openExercisePicker} />}
+        <StartScreen
+          onStartWorkout={openDayPicker}
+          onStartExercise={openExercisePicker}
+          onQuickLog={openExercisePicker}
+        />
         {screen === "home" && <WorkoutsScreen onPickDay={pickDay} data={data} onDelete={handleDeleteWorkout} unit={unit} />}
         {screen === "progress" && <ProgressView data={data} unit={unit} />}
         {screen === "settings" && <Settings data={data} setData={setData} />}
