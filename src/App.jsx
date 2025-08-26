@@ -342,4 +342,20 @@ function ProgressView({ data, unit }){
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" tickFormatter={v=>formatDateEU(v)} />
                 <YAxis tickFormatter={v=>`${v}${unit}`} />
-                <Tooltip formatter={v=>`${v} ${unit}`} labelFormatter={l=>formatDateEU(l)}
+                                 <Tooltip
+                    formatter={(v) => `${v} ${unit}`}
+                    labelFormatter={(l) => formatDateEU(l)}
+                  />
+                  <Line type="monotone" dataKey="weight" stroke="#b91c1c" dot />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        ) : (
+          <div className="text-muted text-sm">
+            Kies een oefening via de zoekbalk of lijst om je progressie te zien.
+          </div>
+        )}
+      </div>
+    );
+}
