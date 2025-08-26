@@ -1,9 +1,9 @@
 :root{
-  --hit-bg:#000;
-  --hit-surface:#111214;
-  --hit-border:#2a2a2e;
-  --hit-text:#fff;
-  --hit-muted:#d1d5db;
+  --hit-bg:#000;            /* zwart */
+  --hit-surface:#0b0b0b;    /* kaartachtergrond */
+  --hit-border:#b91c1c;     /* DONKERRODE rand */
+  --hit-text:#fff;          /* witte tekst */
+  --hit-muted:#d6d6d6;      /* secundaire tekst */
   --hit-red:#b91c1c;
   --hit-red-600:#dc2626;
   --radius:16px;
@@ -14,88 +14,81 @@ html,body{height:100%}
 body{
   margin:0; background:var(--hit-bg); color:var(--hit-text);
   -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-  overflow-x:hidden; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
+  overflow-x:hidden;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
 }
 
-/* App altijd gecentreerd */
+/* Altijd gecentreerd werken in de content */
 #root > main{
-  min-height: calc(100vh - 64px); /* ruimte onder topbar */
+  min-height: calc(100vh - 64px);
   display:flex; align-items:center; justify-content:center;
-  padding: 24px 16px;
+  padding:24px 16px;
 }
 
-/* generieke center helpers */
+/* Centrale kolom */
 .center-col{
-  width:100%;
-  max-width: 820px;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center; text-align:center;
-  gap:16px; margin: 0 auto;
+  width:100%; max-width:820px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; gap:16px; margin:0 auto;
 }
 
+/* Topbar */
 .hit-topbar{
   position:sticky; top:0; z-index:10;
   background:linear-gradient(180deg, #0b0b0c 0%, #0a0a0a 100%);
-  border-bottom:1px solid var(--hit-red);
+  border-bottom:1px solid var(--hit-border);
 }
 
-/* Titel (witte, groter, ander font) */
+/* App-naam (groot en wit) */
 .app-title{
-  font-family: "Bebas Neue", Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
-  font-weight: 700; line-height: .95; letter-spacing:.5px;
-  font-size: 34px; color: var(--hit-text);
+  font-family:"Bebas Neue", Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-weight:700; line-height:.95; letter-spacing:.5px;
+  font-size:36px; color:var(--hit-text);
 }
-@media (min-width:480px){ .app-title{ font-size: 40px; }}
+@media (min-width:480px){ .app-title{font-size:42px}}
 
-/* Cards (gecentreerd) */
+/* Kaarten en lijstitems – ZWARTE bg + DONKERRODE RAND + witte tekst */
 .hit-card{
-  background:var(--hit-surface);
-  border:1px solid var(--hit-border);
-  border-radius:var(--radius);
-  padding:16px;
-  width:100%;
-  max-width: 820px;
+  width:100%; max-width:820px;
+  background:#000; color:var(--hit-text);
+  border:2px solid var(--hit-border); border-radius:var(--radius); padding:18px;
+  text-align:center;
+}
+.list-item{
+  background:#000; color:var(--hit-text);
+  border:2px solid var(--hit-border); border-radius:14px; padding:14px;
   text-align:center;
 }
 
-/* Knoppen: groot, midden, onder elkaar */
+/* Buttons (groot & centraal) */
 .btn{
   cursor:pointer; border-radius:var(--radius);
-  padding:18px; border:1px solid var(--hit-border);
-  background:#16181b; color:var(--hit-text);
+  padding:18px; border:2px solid var(--hit-border);
+  background:#111; color:var(--hit-text);
   width:100%; max-width:520px; margin:0 auto;
-  font-size:22px; font-weight:800;
-  transition: transform .05s ease, background .15s ease, border-color .15s ease;
+  font-size:20px; font-weight:800;
+  transition:transform .05s ease, background .15s ease, border-color .15s ease;
 }
 .btn:active{ transform:scale(.98) }
-.btn-primary{ background:var(--hit-red); border-color:var(--hit-red) }
+.btn-primary{ background:var(--hit-red); border-color:var(--hit-border) }
 .btn-primary:hover{ background:var(--hit-red-600) }
-.btn-ghost{ background:#0f1012 }
+.btn-ghost{ background:#0f0f0f }
 
-/* Inputs & selects – altijd witte tekst, gecentreerd */
+/* Inputs/selects/textarea – witte tekst, centraal */
 .input,.select,.textarea{
   width:100%; max-width:520px; margin:0 auto;
-  background:#0f1012; color:var(--hit-text);
-  border:1px solid var(--hit-border); border-radius:12px;
+  background:#0f0f0f; color:var(--hit-text);
+  border:2px solid var(--hit-border); border-radius:12px;
   padding:12px; outline:none; text-align:center;
 }
-.input:focus,.select:focus,.textarea:focus{ border-color:var(--hit-red) }
+.input:focus,.select:focus,.textarea:focus{ border-color:#d83a3a }
 
-/* Lijst items centraal */
-.list-item{
-  border:1px solid var(--hit-border);
-  background:#0f1012; border-radius:12px; padding:14px;
-  text-align:center;
-}
-
-/* Grafiek container */
-.chart-card{
-  background:var(--hit-surface);
-  border:1px solid var(--hit-border);
-  border-radius:var(--radius);
-  padding:12px;
-  width:100%; max-width:820px; margin:0 auto; text-align:center;
-}
-
-/* Tekstkleur helpers */
+/* Teksthelpers */
 .text-muted{ color:var(--hit-muted) }
+
+/* Grafiek-kaart */
+.chart-card{
+  width:100%; max-width:820px; margin:0 auto; text-align:center;
+  background:#000; color:var(--hit-text);
+  border:2px solid var(--hit-border); border-radius:var(--radius); padding:12px;
+}
