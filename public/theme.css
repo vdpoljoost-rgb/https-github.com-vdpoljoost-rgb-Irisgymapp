@@ -1,0 +1,94 @@
+/* ===== HIT by Joost – Theme Reset ===== */
+:root{
+  --hit-bg:#0a0a0a;          /* bijna zwart */
+  --hit-trueblack:#000000;   /* echt zwart */
+  --hit-surface:#111214;     /* kaart-achtergrond */
+  --hit-border:#2a2a2e;      /* kaart/element border */
+  --hit-text:#ffffff;        /* primaire tekst */
+  --hit-muted:#b5b6ba;       /* secundaire tekst */
+  --hit-red:#b91c1c;         /* donkerrood accent */
+  --hit-red-600:#dc2626;     /* hover rood */
+  --hit-green:#22c55e;       /* done-indicator */
+  --radius:14px;
+}
+
+* { box-sizing: border-box; }
+html, body { height:100%; }
+body{
+  margin:0;
+  background:var(--hit-trueblack);
+  color:var(--hit-text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden; /* geen horizontaal scrollen */
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji","Segoe UI Emoji";
+}
+
+/* Container breedte hint (je gebruikt al max-w via Tailwind) */
+#root > main { max-width: 880px; margin: 0 auto; }
+
+/* Topbar */
+.hit-topbar{
+  position:sticky; top:0; z-index:10;
+  background:linear-gradient(180deg, #0b0b0c 0%, #0a0a0a 100%);
+  border-bottom:1px solid var(--hit-red);
+}
+
+/* Cards */
+.hit-card{
+  background:var(--hit-surface);
+  border:1px solid var(--hit-border);
+  border-radius:var(--radius);
+  padding:16px;
+}
+.hit-card + .hit-card{ margin-top:12px; }
+
+/* Buttons */
+.btn{
+  cursor:pointer; border-radius:var(--radius);
+  padding:10px 14px; border:1px solid var(--hit-border);
+  background:#121316; color:var(--hit-text);
+  transition: transform .05s ease, border-color .15s ease, background .15s ease;
+}
+.btn:active{ transform:scale(0.98); }
+.btn-primary{ background:var(--hit-red); border-color:var(--hit-red); }
+.btn-primary:hover{ background:var(--hit-red-600); }
+.btn-ghost{ background:#0f1012; }
+.btn-danger{ border-color:#5b1111; color:#ffb4b4; }
+.btn-danger:hover{ background:#1a0f10; border-color:#7a1515; }
+
+/* Inputs & Selects */
+.input, .select, .textarea{
+  width:100%;
+  background:#0f1012; color:var(--hit-text);
+  border:1px solid var(--hit-border); border-radius:12px;
+  padding:8px 10px; outline:none;
+}
+.input:focus, .select:focus, .textarea:focus{ border-color:var(--hit-red); }
+
+/* Badges / kleine indicator */
+.badge{
+  display:inline-block; font-size:12px; line-height:1; padding:4px 8px;
+  background:#151518; border:1px solid var(--hit-border); border-radius:999px;
+}
+
+/* Lijst items */
+.list-item{
+  border:1px solid var(--hit-border);
+  background:#0f1012; border-radius:12px; padding:12px;
+}
+
+/* Sectietitel */
+.section-title{ font-weight:600; font-size:18px; margin-bottom:8px; }
+
+/* Helpers */
+.text-muted{ color:var(--hit-muted); }
+.text-accent{ color:var(--hit-red); }
+
+/* Grafiek container (recharts kleurt zelf) */
+.chart-card{
+  background:var(--hit-surface);
+  border:1px solid var(--hit-border);
+  border-radius:var(--radius);
+  padding:12px;
+}
