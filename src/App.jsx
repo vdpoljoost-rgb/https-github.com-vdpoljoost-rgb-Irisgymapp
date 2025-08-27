@@ -9,7 +9,7 @@ import { Save, Trash2, Upload, Download, FileText, Search } from "lucide-react";
    ============================================================ */
 const STORAGE_KEY = "hit_joost_centered_v2";
 const EX_DB_CACHE_KEY = "hit_exercise_db_cache_v1";
-const EX_DB_URL = "/all_exercises.json";
+const EX_DB_URL = `${import.meta.env.BASE_URL || "/"}all_exercises.json`;
 
 const KG_PER_LB = 0.45359237;
 const LB_PER_KG = 1 / KG_PER_LB;
