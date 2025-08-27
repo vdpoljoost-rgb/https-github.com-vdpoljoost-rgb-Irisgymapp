@@ -1,7 +1,6 @@
 {
   "version": 1,
   "exercises": [
-    // ===== Lower body =====
     "Barbell Back Squat (Free Weights)",
     "High-Bar Back Squat (Free Weights)",
     "Low-Bar Back Squat (Free Weights)",
@@ -35,8 +34,6 @@
     "Hip Abduction (Machine)",
     "Hip Adduction (Machine)",
     "Glute Kickback (Machine)",
-
-    // ===== Chest =====
     "Barbell Bench Press (Free Weights)",
     "Incline Barbell Bench Press (Free Weights)",
     "Decline Barbell Bench Press (Free Weights)",
@@ -50,8 +47,6 @@
     "Decline Chest Press (Machine)",
     "Pec Deck Fly (Machine)",
     "Cable Crossover (Machine)",
-
-    // ===== Back =====
     "Barbell Row (Free Weights)",
     "Pendlay Row (Free Weights)",
     "Yates Row (Free Weights)",
@@ -66,8 +61,6 @@
     "Seated Row (Machine)",
     "Chest-Supported Row (Machine)",
     "Assisted Pull-Up (Machine)",
-
-    // ===== Shoulders =====
     "Barbell Overhead Press (Free Weights)",
     "Seated Barbell Press (Free Weights)",
     "Push Press (Free Weights)",
@@ -81,8 +74,6 @@
     "Lateral Raise (Machine)",
     "Rear Delt Fly (Machine)",
     "Face Pull (Machine)",
-
-    // ===== Arms =====
     "Barbell Curl (Free Weights)",
     "EZ-Bar Curl (Free Weights)",
     "Dumbbell Curl (Free Weights)",
@@ -99,8 +90,6 @@
     "Overhead Cable Extension (Machine)",
     "Rope Pushdown (Machine)",
     "Cable Kickback (Machine)",
-
-    // ===== Core =====
     "Hanging Leg Raise (Bodyweight)",
     "Hanging Knee Raise (Bodyweight)",
     "Captain's Chair Leg Raise (Machine)",
@@ -113,8 +102,6 @@
     "Pallof Press (Machine)",
     "Back Extension (Machine)",
     "Back Extension (Bodyweight)",
-
-    // ===== Bodyweight compound =====
     "Pull-Up (Bodyweight)",
     "Chin-Up (Bodyweight)",
     "Push-Up (Bodyweight)",
@@ -124,8 +111,6 @@
     "Pistol Squat (Bodyweight)",
     "Bodyweight Lunge (Bodyweight)",
     "Wall Sit (Bodyweight)",
-
-    // ===== Olympic / power =====
     "Power Clean (Free Weights)",
     "Clean and Press (Free Weights)",
     "Power Snatch (Free Weights)",
