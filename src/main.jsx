@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.jsx"; // let op de hoofdletter A en de .jsx-extensie
-import "./app.css"; // je eigen stylesheet
+import App from "./App.jsx";      // hoofdletter A + .jsx extensie
+import "./app.css";               // dit bestand staat hieronder
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -19,7 +19,7 @@ if (splash) {
       if (splash && splash.parentNode) {
         splash.parentNode.removeChild(splash);
       }
-    }, 500); // zelfde duur als CSS transition
+    }, 500);
   };
 
   const img = splash.querySelector("img");
@@ -35,7 +35,7 @@ if (splash) {
     };
     img.addEventListener("load", onDone, { once: true });
     img.addEventListener("error", onDone, { once: true });
-    setTimeout(onDone, 1200); // fallback
+    setTimeout(onDone, 1200);
   } else {
     setTimeout(startFade, 200);
   }
