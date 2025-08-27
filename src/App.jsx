@@ -402,9 +402,8 @@ function ProgressView({ data, unit, db }){
     </div>
   );
 }
-
 // ---------- Root ----------
-export default function App(){
+function App(){
   const [screen,setScreen]=useState("start");
   const [data,setData]=useState(()=>loadData());
   const [showDayPicker,setShowDayPicker]=useState(false);
@@ -421,8 +420,8 @@ export default function App(){
     setData(next); saveData(next);
   };
 
-  // Laad DB
-  const { exercises: exerciseDB, loading: dbLoading, error: dbError } = useExerciseDB(data);
+  // Oefeningen-DB laden (laat staan als je useExerciseDB gebruikt; anders weghalen)
+  const { exercises: exerciseDB = [], loading: dbLoading = false, error: dbError = null } = (typeof useExerciseDB === "function" ? useExerciseDB(data) : { exercises: [], loading:false, error:null });
 
   const handleNavigate=(value)=>{
     if(value==="exercises"){ setScreen("start"); setShowExercisePicker(true); return; }
@@ -435,7 +434,10 @@ export default function App(){
   const pickDay=(key)=>{ setDayForForm(key); setShowDayPicker(false); };
   const selectExercise=(name)=>{ setCustomExerciseName(name); setDayForForm("custom"); setShowExercisePicker(false); };
 
-  const handleSaveWorkout=(payload)=>{ setData(prev=>({...prev, workouts:[...prev.workouts, payload]})); setDayForForm(null); setCustomExerciseName(null); };
+  const handleSaveWorkout=(payload)=>{
+    setData(prev=>({...prev, workouts:[...prev.workouts, payload]}));
+    setDayForForm(null); setCustomExerciseName(null);
+  };
   const handleDeleteWorkout=(id)=>setData(prev=>({...prev, workouts: prev.workouts.filter(w=>w.id!==id)}));
 
   return (
@@ -444,10 +446,16 @@ export default function App(){
       <main>
         {screen==="start" && <StartScreen onStartWorkout={openDayPicker} onStartExercise={openExercisePicker} />}
         {screen==="home" && <WorkoutsScreen onPickDay={pickDay} data={data} onDelete={handleDeleteWorkout} unit={unit} />}
-        {screen==="progress" && <ProgressView data={data} unit={unit} db={exerciseDB} />}
+        {/* Gebruik de variant van ProgressView die jij in je bestand hebt.
+            Heb je de versie met 'db' prop? Laat de prop dan staan. */}
+        {screen==="progress" && (
+          typeof ProgressView === "function"
+            ? <ProgressView data={data} unit={unit} db={exerciseDB} />
+            : null
+        )}
         {screen==="settings" && <Settings data={data} setData={setData} />}
 
-        {/* Status van DB laadproces (klein en niet storend) */}
+        {/* optionele statusregel */}
         <div style={{marginTop:12, textAlign:"center"}} className="text-muted">
           {dbLoading ? "Oefeningendatabase laden…" : dbError ? "Kon oefeningendatabase niet verversen — gebruik cache/fallback." : ""}
         </div>
@@ -469,7 +477,13 @@ export default function App(){
         </div>
       )}
 
-      {showExercisePicker && <ExercisePicker db={exerciseDB} onSelect={selectExercise} onClose={()=>setShowExercisePicker(false)} />}
+      {showExercisePicker && typeof ExercisePicker === "function" && (
+        <ExercisePicker
+          db={exerciseDB}
+          onSelect={selectExercise}
+          onClose={()=>setShowExercisePicker(false)}
+        />
+      )}
 
       {dayForForm && (
         <WorkoutForm
@@ -485,7 +499,7 @@ export default function App(){
   );
 }
 
-// ---------- Settings ----------
+/* ---------- Settings (laat staan als je 'm al had; anders vervang/verwijder dubbele) ---------- */
 function Settings({ data, setData }){
   const exportData=()=>{
     const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
@@ -526,3 +540,7 @@ function Settings({ data, setData }){
     </div>
   );
 }
+
+/* ---------- En nu de ENIGE export ---------- */
+export default App;
+
