@@ -7,9 +7,8 @@ import { Save, Trash2, Upload, Download, FileText, Search, Trophy } from "lucide
 /* ============================================================
    STORAGE / HELPERS
    ============================================================ */
-const STORAGE_KEY = "hit_joost_centered_v2";
+const STORAGE_KEY = "hit_iris_centered_v1";
 const EX_DB_CACHE_KEY = "hit_exercise_db_cache_v1";
-// Werkt op root of subpath:
 const EX_DB_URL = `${import.meta.env.BASE_URL || "/"}all_exercises.json`;
 
 const KG_PER_LB = 0.45359237;
@@ -49,51 +48,46 @@ function fromKg(unit, kg) {
 const norm = (s) => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
 
 /* ============================================================
-   PLAN
+   IRIS — LEGS & GLUTES FOCUS PLAN
    ============================================================ */
 const EXERCISE_PLAN = {
   day1: {
-    name: "Dag 1 – Legs + Calves + Abs",
+    name: "Dag 1 – Glutes & Quads",
     exercises: [
-      { name: "Squat (Free Weights)", note: "1 werkset 6–10" },
-      { name: "Leg Press (Machine)", note: "1 werkset 8–12 + 1–2 dropsets" },
-      { name: "Romanian Deadlift (Free Weights)", note: "1 werkset 6–10" },
-      { name: "Lying Leg Curl (Machine)", note: "1 werkset 8–12 + dropset" },
-      { name: "Standing Calf Raise (Machine)", note: "1 werkset 10–15 + 2 dropsets" },
-      { name: "Hanging Leg Raise (Bodyweight)", note: "1 set tot falen (10–20)" },
-      { name: "Ab Wheel Rollout (Bodyweight)", note: "1 set 8–12" },
+      { name: "Barbell Back Squat (Free Weights)", note: "1 werkset 6–10" },
+      { name: "Hip Thrust (Free Weights)", note: "1 werkset 8–12 + dropset" },
+      { name: "Bulgarian Split Squat (Free Weights)", note: "1 werkset 6–10" },
+      { name: "Leg Press (Machine)", note: "1 werkset 10–15 + 1–2 dropsets" },
+      { name: "Leg Extension (Machine)", note: "1 werkset 10–15 + dropset" },
     ],
   },
   day2: {
-    name: "Dag 2 – Upper Body",
+    name: "Dag 2 – Upper Light / Core",
     exercises: [
-      { name: "Barbell Bench Press (Free Weights)", note: "1 werkset 6–10" },
-      { name: "Lat Pulldown (Machine)", note: "1 werkset 6–10" },
-      { name: "Incline Chest Press (Machine)", note: "1 werkset 8–12 + dropset" },
+      { name: "Lat Pulldown (Machine)", note: "1 werkset 8–12" },
+      { name: "Dumbbell Shoulder Press (Free Weights)", note: "1 werkset 6–10" },
       { name: "Seated Row (Machine)", note: "1 werkset 8–12 + dropset" },
-      { name: "Pec Deck Fly (Machine)", note: "1 werkset 8–12 + dropset" },
-      { name: "Barbell Curl (Free Weights)", note: "1 werkset 6–10" },
-      { name: "Rope Pushdown (Machine)", note: "1 werkset 8–12 + dropset" },
+      { name: "Plank (Bodyweight)", note: "2 sets 30–60 sec" },
+      { name: "Side Plank (Bodyweight)", note: "2 sets 20–40 sec" },
     ],
   },
   day3: {
-    name: "Dag 3 – Shoulders + Calves + Cardio",
+    name: "Dag 3 – Glutes & Hamstrings",
     exercises: [
-      { name: "Barbell Overhead Press (Free Weights)", note: "1 werkset 6–10" },
-      { name: "Lateral Raise (Machine)", note: "1 werkset 10–12 + dropset" },
-      { name: "Rear Delt Fly (Machine)", note: "1 werkset 10–12 + dropset" },
-      { name: "Upright Row (Free Weights)", note: "1 werkset 6–10" },
+      { name: "Romanian Deadlift (Free Weights)", note: "1 werkset 6–10" },
+      { name: "Cable Glute Kickback (Machine)", note: "1 werkset 10–15 + dropset" },
+      { name: "Lying Leg Curl (Machine)", note: "1 werkset 8–12 + dropset" },
+      { name: "Walking Lunge (Free Weights)", note: "1 werkset 8–12 per been" },
       { name: "Seated Calf Raise (Machine)", note: "1 werkset 12–15 + dropset" },
-      { name: "Ab Coaster (Machine)", note: "3 sets tot falen" },
-      { name: "Hanging Leg Raise (Bodyweight)", note: "2 sets tot falen" },
-      { name: "Steady State Cardio", note: "30–40 min zone 2" },
     ],
   },
   day4: {
-    name: "Dag 4 – Cardio / Active Recovery",
+    name: "Dag 4 – Glutes & Conditioning",
     exercises: [
-      { name: "Steady State Cardio", note: "45–60 min zone 2" },
-      { name: "Core stabiliteit (Pallof Press) (Machine)", note: "optioneel" },
+      { name: "Hip Thrust (Free Weights)", note: "1 werkset 8–12 + 2× dropset" },
+      { name: "Step-Up (Free Weights)", note: "1 werkset 8–12 per been" },
+      { name: "Hip Abduction (Machine)", note: "1 werkset 12–20 + 1–2 dropsets" },
+      { name: "Steady State Cardio", note: "20–30 min zone 2" },
     ],
   },
 };
@@ -108,10 +102,12 @@ const dayOptions = [
    DYNAMISCHE OEFENINGEN-DB
    ============================================================ */
 const FALLBACK_EXERCISES = [
-  "Barbell Back Squat (Free Weights)","Leg Press (Machine)","Romanian Deadlift (Free Weights)",
-  "Barbell Bench Press (Free Weights)","Lat Pulldown (Machine)","Seated Row (Machine)",
-  "Barbell Overhead Press (Free Weights)","Lateral Raise (Machine)","Seated Calf Raise (Machine)",
-  "Hanging Leg Raise (Bodyweight)","Ab Wheel Rollout (Bodyweight)","Cable Crunch (Machine)"
+  "Barbell Back Squat (Free Weights)","Front Squat (Free Weights)","Hip Thrust (Free Weights)",
+  "Bulgarian Split Squat (Free Weights)","Leg Press (Machine)","Leg Extension (Machine)",
+  "Romanian Deadlift (Free Weights)","Cable Glute Kickback (Machine)","Lying Leg Curl (Machine)",
+  "Walking Lunge (Free Weights)","Seated Calf Raise (Machine)","Hip Abduction (Machine)",
+  "Lat Pulldown (Machine)","Dumbbell Shoulder Press (Free Weights)","Seated Row (Machine)",
+  "Plank (Bodyweight)","Side Plank (Bodyweight)","Step-Up (Free Weights)"
 ];
 
 function useExerciseDB(data) {
@@ -119,7 +115,6 @@ function useExerciseDB(data) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // cache eerst
   useEffect(() => {
     try {
       const cachedRaw = localStorage.getItem(EX_DB_CACHE_KEY);
@@ -133,7 +128,6 @@ function useExerciseDB(data) {
     } catch {}
   }, []);
 
-  // vervolgens vers opvragen
   useEffect(() => {
     (async () => {
       try {
@@ -146,9 +140,7 @@ function useExerciseDB(data) {
         localStorage.setItem(EX_DB_CACHE_KEY, JSON.stringify({ version: json.version || 1, exercises: uniq }));
         setError(null);
       } catch (e) {
-        if (!localStorage.getItem(EX_DB_CACHE_KEY)) {
-          setBase(FALLBACK_EXERCISES);
-        }
+        if (!localStorage.getItem(EX_DB_CACHE_KEY)) setBase(FALLBACK_EXERCISES);
         setError(String(e?.message || e));
       } finally {
         setLoading(false);
@@ -156,7 +148,6 @@ function useExerciseDB(data) {
     })();
   }, []);
 
-  // merge met gelogde namen
   const merged = useMemo(() => {
     const names = new Set(base);
     (data?.workouts || []).forEach(w => (w.sets || []).forEach(s => names.add(s.name)));
@@ -167,7 +158,7 @@ function useExerciseDB(data) {
 }
 
 /* ============================================================
-   PROGRESSIE HULPFUNCTIES (met lange-termijn trend)
+   PROGRESSIE & PR-HELPERS
    ============================================================ */
 function monthKey(isoDate){ const d=new Date(isoDate); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`; }
 function average(arr){ if(!arr.length) return 0; return arr.reduce((a,b)=>a+b,0)/arr.length; }
@@ -185,14 +176,13 @@ function computeExerciseStats(data, unit, exerciseName){
   const start   = pts[0].weight;
   const deltaAbs = +(current - start).toFixed(2);
 
-  // Per-maand gemiddelden (voor maandtrend)
   const byMonth = new Map();
   for(const p of pts){
     const mk = monthKey(p.date);
     if(!byMonth.has(mk)) byMonth.set(mk, []);
     byMonth.get(mk).push(p.weight);
   }
-  const months = Array.from(byMonth.keys()).sort(); // YYYY-MM
+  const months = Array.from(byMonth.keys()).sort();
   const lastMonth = months[months.length-1];
   const prevMonth = months.length>=2 ? months[months.length-2] : null;
 
@@ -204,7 +194,6 @@ function computeExerciseStats(data, unit, exerciseName){
     trendPct = +(((avgLast-avgPrev)/avgPrev)*100).toFixed(1);
   }
 
-  // Recente trend (laatste 2–4 punten)
   const recent = pts.slice(-4).map(p=>p.weight);
   let recentTrend = "stabiel";
   if(recent.length>=2){
@@ -215,7 +204,6 @@ function computeExerciseStats(data, unit, exerciseName){
     else if(change<0 && absPct>=2) recentTrend="dalend";
   }
 
-  // Lange-termijn trend t.o.v. eerste meting
   let longTermTrend = "stabiel";
   let longTermPct = null;
   if(start>0){
@@ -233,7 +221,6 @@ function computeExerciseStats(data, unit, exerciseName){
   };
 }
 
-// Dashboard: top N maand-delta’s (absolute waarde aflopend)
 function computeMonthlyDeltas(data, unit){
   const byExercise = new Map();
   for(const w of data.workouts||[]){
@@ -248,7 +235,7 @@ function computeMonthlyDeltas(data, unit){
   const rows = [];
   byExercise.forEach((arr,name)=>{
     arr.sort((a,b)=>new Date(a.date)-new Date(b.date));
-    const buckets = new Map(); // month -> [weights]
+    const buckets = new Map();
     for(const p of arr){
       const mk = monthKey(p.date);
       if(!buckets.has(mk)) buckets.set(mk, []);
@@ -267,10 +254,7 @@ function computeMonthlyDeltas(data, unit){
   return rows;
 }
 
-/* ============================================================
-   PR-DETECTOR
-   ============================================================ */
-// Geef per oefening de volledige reeks PR-events (telkens wanneer een nieuw hoogste gewicht wordt gezet)
+/* ===== PR-DETECTIE ===== */
 function computeAllPREvents(data, unit){
   const byExercise = new Map();
   for(const w of data.workouts||[]){
@@ -287,98 +271,75 @@ function computeAllPREvents(data, unit){
   byExercise.forEach((arr, name)=>{
     arr.sort((a,b)=>new Date(a.date)-new Date(b.date));
     let best = -Infinity;
-    let prevBest = null;
     for(const p of arr){
       if(p.weight>best){
         const delta = (best===-Infinity) ? null : +(p.weight - best).toFixed(2);
-        const event = {
-          name,
-          date: p.date,
-          weight: p.weight,
-          prevBest: (best===-Infinity)? null : best,
-          delta
-        };
-        allEvents.push(event);
-        prevBest = (best===-Infinity)? null : best;
+        allEvents.push({ name, date: p.date, weight: p.weight, prevBest: (best===-Infinity? null: best), delta });
         best = p.weight;
       }
     }
   });
 
-  // Sorteer alle PR-events (laatste eerst)
   allEvents.sort((a,b)=>new Date(b.date)-new Date(a.date));
   return allEvents;
 }
-
-// Huidige PR voor specifieke oefening
 function getExercisePR(data, unit, exerciseName){
   const events = computeAllPREvents(data, unit).filter(e=> e.name===exerciseName);
   if(!events.length) return null;
-  const last = events[events.length-1]; // laatste in tijd is huidige PR
+  const last = events[events.length-1];
   return { bestWeight:last.weight, bestDate:last.date };
 }
-
-// Recente PR’s binnen X dagen (default 45) — uniek per oefening (laatste event per oefening binnen venster)
 function computeRecentPRs(data, unit, days=45){
   const events = computeAllPREvents(data, unit);
   if(!events.length) return [];
   const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-days);
-
   const perExercise = new Map();
   for(const e of events){
     if(new Date(e.date) >= cutoff){
-      // neem de meest recente event per oefening
       if(!perExercise.has(e.name)) perExercise.set(e.name, e);
-      else {
-        const curr = perExercise.get(e.name);
-        if(new Date(e.date) > new Date(curr.date)) perExercise.set(e.name, e);
-      }
+      else if(new Date(e.date) > new Date(perExercise.get(e.name).date)) perExercise.set(e.name, e);
     }
   }
-
   const recent = Array.from(perExercise.values());
   recent.sort((a,b)=>new Date(b.date)-new Date(a.date));
   return recent;
 }
 
 /* ============================================================
-   MOTIVATION (30 varianten)
+   QUOTES — Vrouwelijk / Bootybuilding focus (30)
    ============================================================ */
-const MOTIVATION = [
-  "Blijf vlammen — progressie is progressie.",
-  "Elke rep telt. Gas erop.",
-  "Sterk én scherp. Op naar de volgende PR.",
-  "Discipline wint van motivatie. Doorpakken.",
-  "Het gaat de goede kant op — blijf bouwen.",
-  "Rustig progressief — zo word je duurzaam sterker.",
-  "Focus op techniek, het gewicht volgt.",
-  "Zwaar is relatief. Jij wordt absoluut sterker.",
-  "Kleine stappen, grote resultaten.",
-  "Op weg naar je volgende PR — blijf knallen.",
-  "Consistentie is je superkracht.",
-  "Vandaag beter dan gisteren — klaar.",
-  "Hou de basis strak, dan komt de rest vanzelf.",
-  "Eén goede set kan je hele training maken.",
-  "Tempo, vorm, focus — daarna pas gewicht.",
-  "Herstel goed, groei beter.",
-  "Je bent onderweg — blijf op koers.",
-  "Geen shortcuts, wel vooruitgang.",
-  "Kalm blijven, hard trainen.",
-  "Progressie is geen toeval; het is een keuze.",
-  "Je bent sterker dan je denkt.",
-  "Elke set is een kans om te winnen.",
-  "Morgen dankt jou voor wat je vandaag doet.",
-  "Maak de rep — maak het verschil.",
-  "Vertrouw het proces. Het werkt.",
-  "Slijt de techniek, smeed de kracht.",
-  "Hou het simpel, maak het zwaar.",
-  "Weinig sets, veel intentie.",
-  "Stap voor stap, kilo voor kilo.",
-  "Blijf knallen — jij bepaalt het tempo."
+const QUOTES = [
+  { who:"Iris", text:"Strong glutes, strong body." },
+  { who:"Iris", text:"Confidence is built one squat at a time." },
+  { who:"Iris", text:"Booty gains are real gains." },
+  { who:"Iris", text:"She believed she could, so she lifted." },
+  { who:"Iris", text:"Weights aren’t masculine or feminine — they’re powerful." },
+  { who:"Iris", text:"Thick thighs save lives." },
+  { who:"Iris", text:"Train your booty like it’s your superpower." },
+  { who:"Iris", text:"Sweat now, shine later." },
+  { who:"Iris", text:"Every rep shapes your strength." },
+  { who:"Iris", text:"Don’t shrink to fit the world. Grow strong to shape it." },
+  { who:"Iris", text:"Build curves with consistency." },
+  { who:"Iris", text:"You’re not fragile — you’re a force." },
+  { who:"Iris", text:"Quads & glutes carry confidence." },
+  { who:"Iris", text:"Lunge forward — literally and in life." },
+  { who:"Iris", text:"Progress over perfection, always." },
+  { who:"Iris", text:"Today’s burn is tomorrow’s shape." },
+  { who:"Iris", text:"Lift heavy. Lift proud." },
+  { who:"Iris", text:"Discipline makes the difference." },
+  { who:"Iris", text:"Your future self loves these sets." },
+  { who:"Iris", text:"Curves built, not bought." },
+  { who:"Iris", text:"Glutes on — doubts off." },
+  { who:"Iris", text:"Hip thrusts: when power meets shape." },
+  { who:"Iris", text:"Own your strength — and your style." },
+  { who:"Iris", text:"Confidence is the best pre-workout." },
+  { who:"Iris", text:"Be the woman who decided to go for it." },
+  { who:"Iris", text:"Shape is sculpted by effort." },
+  { who:"Iris", text:"Heavy today, glorious tomorrow." },
+  { who:"Iris", text:"Fuel the fire — your growth is near." },
+  { who:"Iris", text:"Glute days build more than muscle." },
+  { who:"Iris", text:"Keep showing up. She does." },
 ];
-function pickMotivation(){
-  return MOTIVATION[Math.floor(Math.random()*MOTIVATION.length)];
-}
 
 /* ============================================================
    TOPBAR — logo midden-boven (home), dropdown rechts
@@ -387,29 +348,12 @@ function TopBar({ current, onNavigate }) {
   return (
     <header className="hit-topbar">
       <div className="topbar-wrap">
-        {/* Home / Logo (midden) */}
-        <button
-          onClick={() => onNavigate("start")}
-          className="topbar-logo"
-          aria-label="Home (HIT)"
-          title="Home"
-        >
-          <img
-            src="/unnamed-192.png"
-            alt="HIT"
-            className="logo-img neon-ring"
-          />
+        <button onClick={() => onNavigate("start")} className="topbar-logo" aria-label="Home (HIT)" title="Home">
+          <img src="/unnamed-192.png" alt="HIT" className="logo-img neon-ring" />
           <span className="sr-only">Home</span>
         </button>
-
-        {/* Dropdown (rechts) */}
         <div className="topbar-right">
-          <select
-            value={current}
-            onChange={(e) => onNavigate(e.target.value)}
-            className="select"
-            aria-label="Navigatie"
-          >
+          <select value={current} onChange={(e) => onNavigate(e.target.value)} className="select" aria-label="Navigatie">
             <option value="start">Start</option>
             <option value="home">Workouts</option>
             <option value="exercises">Exercises</option>
@@ -422,12 +366,6 @@ function TopBar({ current, onNavigate }) {
   );
 }
 
-/* Korte rotatie van bekende quotes (optioneel) */
-const QUOTES = [
-  { who: "Arnold Schwarzenegger", text: "The last three or four reps is what makes the muscle grow." },
-  { who: "Mike Mentzer", text: "Hard work isn’t enough—training must be brief, intense and infrequent." },
-];
-
 /* ============================================================
    UI COMPONENTS
    ============================================================ */
@@ -436,26 +374,20 @@ function StartScreen({ onStartWorkout, onStartExercise, data, unit }){
   const q=QUOTES[idx];
   useEffect(()=>{ const id=setInterval(()=>setIdx(p=>(p+1)%QUOTES.length),10000); return ()=>clearInterval(id); },[]);
 
-  // Top 3 maand-delta’s
   const monthly = useMemo(()=> computeMonthlyDeltas(data, unit).slice(0,3), [data, unit]);
-
   const statusText = useMemo(()=>{
     if(monthly.length===0) return "Nog geen data om samen te vatten.";
     const ups = monthly.filter(r=>r.delta>0).length;
     const downs = monthly.filter(r=>r.delta<0).length;
     if(ups && !downs) return "Sterker geworden in meerdere lifts.";
-    if(ups && downs) return "Netto progressie — enkele lifts stijgen, andere even stabiel of licht omlaag.";
+    if(ups && downs) return "Netto progressie — sommige stijgen, andere even stabiel.";
     return "Even stabiel — goede basis om door te bouwen.";
   },[monthly]);
 
-  const motivation = useMemo(()=> pickMotivation(), [data?.workouts?.length]);
-
-  // Recente PR's (laatste 45 dagen), max 5 tonen
   const recentPRs = useMemo(()=> computeRecentPRs(data, unit, 45).slice(0,5), [data, unit]);
 
   return (
     <div className="center-col">
-      {/* Dashboard blok */}
       <div className="hit-card neon-border" style={{width:"100%"}}>
         <div className="font-semibold text-lg">📈 Mijn Progressie</div>
         <div style={{marginTop:8}}>
@@ -474,7 +406,6 @@ function StartScreen({ onStartWorkout, onStartExercise, data, unit }){
             <div className="text-muted">Nog te weinig data deze maand.</div>
           )}
 
-          {/* Recente PR’s */}
           <div style={{marginTop:12}}>
             <div className="font-semibold" style={{display:"flex", alignItems:"center", gap:8}}>
               <Trophy className="icon accent" /> Recente PR’s
@@ -494,15 +425,13 @@ function StartScreen({ onStartWorkout, onStartExercise, data, unit }){
 
           <div style={{marginTop:10}}><strong>Huidige status:</strong> {statusText}</div>
           <div style={{marginTop:6}}><strong>Vooruitblik:</strong> Op weg naar je volgende PR!</div>
-          <div style={{marginTop:6}}>🔥 {motivation}</div>
+          <div style={{marginTop:6}}>🔥 {q.text}</div>
         </div>
       </div>
 
-      {/* Actieknoppen */}
       <button onClick={onStartWorkout} className="btn btn-primary neon">Start Workout</button>
       <button onClick={onStartExercise} className="btn btn-ghost neon-white">Start Exercise</button>
 
-      {/* Quote blok */}
       <div className="hit-card neon-border" style={{marginTop:12}}>
         <blockquote className="text-2xl font-semibold leading-tight">“{q.text}”</blockquote>
         <p className="mt-2 text-muted">— {q.who}</p>
@@ -707,44 +636,33 @@ function ProgressView({ data, unit, db }){
 
   const best = chartData.length ? Math.max(...chartData.map(p=>p.weight)) : null;
 
-  // Analyse met lange-termijn trend
   const stats = useMemo(()=> exercise? computeExerciseStats(data, unit, exercise) : null, [data, unit, exercise]);
-
-  // PR-info (huidige PR + datum)
   const prInfo = useMemo(()=> exercise? getExercisePR(data, unit, exercise) : null, [data, unit, exercise]);
 
   const analysisText = useMemo(()=>{
     if(!stats) return "Selecteer een oefening om je voortgang te analyseren.";
     const parts = [];
-
-    if(prInfo?.bestWeight){
-      parts.push(`Huidige PR: ${prInfo.bestWeight} ${unit} op ${formatDateEU(prInfo.bestDate)}.`);
-    }
-
-    // Milestone sinds start
+    if(prInfo?.bestWeight){ parts.push(`Huidige PR: ${prInfo.bestWeight} ${unit} op ${formatDateEU(prInfo.bestDate)}.`); }
     if(stats.deltaAbs>0) parts.push(`Sinds start ben je +${stats.deltaAbs} ${unit} vooruit gegaan.`);
-    else if(stats.deltaAbs<0) parts.push(`Sinds start is het -${Math.abs(stats.deltaAbs)} ${unit}. Komt goed — focus op vorm en herstel.`);
-    else parts.push("Sinds start ben je stabiel in gewicht. Tijd om het trainingsplan te prikkelen.");
+    else if(stats.deltaAbs<0) parts.push(`Sinds start is het -${Math.abs(stats.deltaAbs)} ${unit}. Rustig bijsturen — vorm & herstel.`);
+    else parts.push("Sinds start stabiel — tijd om het plan te prikkelen.");
 
-    // Lange-termijn trend (percentage)
     if(stats.longTermPct!=null){
-      if(stats.longTermPct>0) parts.push(`T.o.v. je allereerste meting sta je nu gemiddeld +${stats.longTermPct}% (${stats.longTermTrend}).`);
-      else if(stats.longTermPct<0) parts.push(`T.o.v. je allereerste meting is het -${Math.abs(stats.longTermPct)}% (${stats.longTermTrend}). Rustig bijsturen en doorpakken.`);
-      else parts.push("Vergeleken met je allereerste meting sta je gelijk — solide basis om te versnellen.");
+      if(stats.longTermPct>0) parts.push(`T.o.v. je allereerste meting sta je +${stats.longTermPct}% (${stats.longTermTrend}).`);
+      else if(stats.longTermPct<0) parts.push(`T.o.v. je allereerste meting -${Math.abs(stats.longTermPct)}% (${stats.longTermTrend}).`);
+      else parts.push("Gelijk aan je allereerste meting — solide basis.");
     }
 
-    // Maandtrend
     if(stats.trendPct!=null){
       if(stats.trendPct>0) parts.push(`Deze maand gemiddeld ${stats.trendPct}% zwaarder dan vorige maand.`);
-      else if(stats.trendPct<0) parts.push(`Deze maand gemiddeld ${Math.abs(stats.trendPct)}% lichter dan vorige maand — mogelijk deload of vermoeidheid.`);
+      else if(stats.trendPct<0) parts.push(`Deze maand gemiddeld ${Math.abs(stats.trendPct)}% lichter — mogelijk deload.`);
       else parts.push("Deze maand gelijk aan vorige maand — consistentie is key.");
     }else{
       parts.push("Nog te weinig data voor een maandvergelijking.");
     }
 
-    // Recent trend positief framen
     if(stats.recentTrend==="stijgend") parts.push("Lijn is stijgend — op weg naar je volgende PR!");
-    else if(stats.recentTrend==="dalend") parts.push("Even wat terugval — rustig bijsturen met techniek en herstel.");
+    else if(stats.recentTrend==="dalend") parts.push("Even terugval — bijsturen met techniek en herstel.");
     else parts.push("Even stabiel — perfecte basis om door te pakken.");
 
     return parts.join(" ");
@@ -801,13 +719,12 @@ function ProgressView({ data, unit, db }){
                   <XAxis dataKey="date" tickFormatter={(v)=>formatDateEU(v)} />
                   <YAxis tickFormatter={(v)=>`${v}${unit}`} />
                   <Tooltip formatter={(v)=>`${v} ${unit}`} labelFormatter={(l)=>formatDateEU(l)} />
-                  <Line type="monotone" dataKey="weight" stroke="#ff1744" dot />
+                  <Line type="monotone" dataKey="weight" stroke="#ff1e90" dot />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Tekstuele analyse */}
           <div className="hit-card neon-border">
             <div className="font-semibold">Analyse</div>
             <div style={{marginTop:6}}>{analysisText}</div>
@@ -840,7 +757,6 @@ function App() {
     setData(next); saveData(next);
   };
 
-  // DB
   const { exercises: exerciseDB, loading: dbLoading, error: dbError } = useExerciseDB(data);
 
   const handleNavigate = (value) => {
@@ -929,7 +845,7 @@ function Settings({ data, setData }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `hit_joost_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `hit_iris_backup_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -970,6 +886,6 @@ function Settings({ data, setData }) {
 }
 
 /* ============================================================
-   EXPORT (enige export)
+   EXPORT
    ============================================================ */
 export default App;
