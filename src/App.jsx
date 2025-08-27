@@ -168,35 +168,48 @@ function useExerciseDB(data) {
 /* ============================================================
    UI COMPONENTS
    ============================================================ */
+// =============================================================
+// TOPBAR — logo midden-boven (home), dropdown rechts
+// =============================================================
 function TopBar({ current, onNavigate }) {
   return (
-    <div className="hit-topbar">
-      <div className="mx-auto max-w-3xl px-4 py-3">
-        <div className="flex items-center gap-3">
-          <button onClick={() => onNavigate("start")} className="flex items-center gap-3 min-w-0 group" aria-label="Home">
-            <img src="/unnamed-192.png" alt="App logo" className="w-10 h-10 rounded-full object-cover neon-ring" />
-            <div className="app-title">High Intensity<br />Training by Joost</div>
-          </button>
-          <div className="ml-auto flex items-center gap-2">
-            <select
-              value={current}
-              onChange={(e) => onNavigate(e.target.value)}
-              className="select"
-              aria-label="Navigatie"
-              style={{ width: 180 }}
-            >
-              <option value="start">Start</option>
-              <option value="home">Workouts</option>
-              <option value="exercises">Exercises</option>
-              <option value="progress">Progressie</option>
-              <option value="settings">Instellingen</option>
-            </select>
-          </div>
+    <header className="hit-topbar">
+      <div className="topbar-wrap">
+        {/* Home / Logo (midden) */}
+        <button
+          onClick={() => onNavigate("start")}
+          className="topbar-logo"
+          aria-label="Home (HIT)"
+          title="Home"
+        >
+          <img
+            src="/unnamed-192.png"
+            alt="HIT"
+            className="logo-img neon-ring"
+          />
+          <span className="sr-only">Home</span>
+        </button>
+
+        {/* Dropdown (rechts) */}
+        <div className="topbar-right">
+          <select
+            value={current}
+            onChange={(e) => onNavigate(e.target.value)}
+            className="select"
+            aria-label="Navigatie"
+          >
+            <option value="start">Start</option>
+            <option value="home">Workouts</option>
+            <option value="exercises">Exercises</option>
+            <option value="progress">Progressie</option>
+            <option value="settings">Instellingen</option>
+          </select>
         </div>
       </div>
-    </div>
+    </header>
   );
 }
+
 
 const QUOTES = [
   { who: "Arnold Schwarzenegger", text: "The last three or four reps is what makes the muscle grow." },
